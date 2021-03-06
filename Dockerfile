@@ -2,8 +2,8 @@
 ARG GORELEASER_VERSION=0.159.0
 ARG GO_VERSION=1.16
 
-FROM --platform=${BUILDPLATFORM:-linux/amd64} tonistiigi/xx:golang AS xgo
-FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:${GO_VERSION}-alpine AS base
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:golang AS xgo
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
 COPY --from=xgo / /
 RUN apk --update --no-cache add build-base git
 ARG GORELEASER_VERSION
@@ -54,8 +54,8 @@ ARG TARGETPLATFORM
 RUN goreleaser-xx --debug \
   --name="goreleaser" \
   --dist="/out" \
-  --before-hooks="go mod tidy" \
-  --before-hooks="go mod download" \
+  --hooks="go mod tidy" \
+  --hooks="go mod download" \
   --ldflags="-s -w -X 'main.version={{.Version}}'" \
   --files="LICENSE" \
   --files="README.md"
