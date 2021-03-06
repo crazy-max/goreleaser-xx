@@ -23,7 +23,7 @@ var (
 type Cli struct {
 	Version     kong.VersionFlag
 	Debug       bool     `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
-	GitRef      string   `kong:"name='git-ref',env='GIT_REF',help='The branch or tag (e.g. refs/tags/v1.0.0).'"`
+	GitRef      string   `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
 	GoReleaser  string   `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
 	Name        string   `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
 	Dist        string   `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
