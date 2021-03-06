@@ -35,9 +35,9 @@ jobs:
           images: |
             ${{ env.DOCKERHUB_SLUG }}
             ${{ env.GHCR_SLUG }}
-          tag-semver: |
-            {{version}}
           tag-edge: true
+          tag-match: v(.*)-r
+          tag-match-group: 1
           label-custom: |
             org.opencontainers.image.title=goreleaser-xx
             org.opencontainers.image.description=Cross compilation helper for GoReleaser
