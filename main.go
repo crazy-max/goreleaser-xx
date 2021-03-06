@@ -31,6 +31,7 @@ type Cli struct {
 	Main       string   `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
 	Ldflags    string   `kong:"name='ldflags',env='GORELEASER_LDFLAGS',help='Custom ldflags templates.'"`
 	Files      []string `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
+	Snapshot   bool     `kong:"name='snapshot',env='GORELEASER_SNAPSHOT',default='false',help='Run in snapshot mode.'"`
 }
 
 func main() {
@@ -84,25 +85,32 @@ func main() {
 	defer os.Remove(grConfig)
 	grFlags = append(grFlags, "release", "--config", grConfig)
 
-	// Check Git tag
+	// Git tag
 	if strings.HasPrefix(cli.GitRef, "refs/tags/v") {
 		if err := os.Setenv("GORELEASER_CURRENT_TAG", strings.TrimLeft(cli.GitRef, "refs/tags/v")); err != nil {
 			log.Printf("WARN: cannot set GORELEASER_CURRENT_TAG env var: %v", err)
 		}
 	}
-
 	gitTag, err := getGitTag()
 	if err != nil {
 		log.Fatalf("ERR: %v", err)
 	}
 	log.Printf("INF: git tag found: %s", gitTag)
 
-	// Check Git dirty
-	gitDirty := isGitDirty(gitTag)
-	if gitDirty {
+	// Validate
+	gitDirty := isGitDirty()
+	log.Printf("INF: git dirty: %t", gitDirty)
+	gitWrongRef := isWrongRef(gitTag)
+	log.Printf("INF: git wrong ref: %t", gitWrongRef)
+	if gitDirty || gitWrongRef || cli.Snapshot {
 		grFlags = append(grFlags, "--snapshot")
 	}
-	log.Printf("INF: git dirty: %t", gitDirty)
+
+	// Display status
+	log.Println("INF: git status:")
+	log.Printf("  tag=%s", gitTag)
+	log.Printf("  dirty=%t", gitDirty)
+	log.Printf("  wrongref=%t", gitWrongRef)
 
 	// Start GoReleaser
 	log.Printf("INF: %s %s", cli.GoReleaser, strings.Join(grFlags, " "))

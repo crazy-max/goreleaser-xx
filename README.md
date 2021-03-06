@@ -59,6 +59,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--main`          | `GORELEASER_MAIN`         | Path to main.go file or main package (default `.`) |
 | `--ldflags`       | `GORELEASER_LDFLAGS`      | Custom ldflags templates |
 | `--files`         | `GORELEASER_FILES`        | Additional files/template/globs you want to add to the [archive](https://goreleaser.com/customization/archive/) |
+| `--snapshot`      | `GORELEASER_SNAPSHOT`     | Run in [snapshot](https://goreleaser.com/customization/snapshots/) mode |
 
 ## Usage
 

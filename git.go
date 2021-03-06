@@ -53,9 +53,14 @@ func getGitTag() (string, error) {
 	return tag, err
 }
 
-func isGitDirty(tag string) bool {
+func isWrongRef(tag string) bool {
 	if _, err := git("describe", "--exact-match", "--tags", "--match", tag); err != nil {
 		return true
 	}
 	return false
+}
+
+func isGitDirty() bool {
+	out, err := git("status", "--porcelain")
+	return strings.TrimSpace(out) != "" || err != nil
 }
