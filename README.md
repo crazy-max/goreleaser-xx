@@ -55,7 +55,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--goreleaser`    | `GORELEASER_PATH`         | Path to GoReleaser binary (default `/opt/goreleaser-xx/goreleaser`) |
 | `--name`          | `GORELEASER_NAME`         | Project name |
 | `--dist`          | `GORELEASER_DIST`         | Dist folder where artifact will be stored |
-| `--before-hooks`  | `GORELEASER_BEFORE_HOOKS` | [Hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
+| `--hooks`         | `GORELEASER_HOOKS`        | [Hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
 | `--main`          | `GORELEASER_MAIN`         | Path to main.go file or main package (default `.`) |
 | `--ldflags`       | `GORELEASER_LDFLAGS`      | Custom ldflags templates the colorized output |
 | `--files`         | `GORELEASER_FILES`        | Additional files/template/globs you want to add to the [archive](https://goreleaser.com/customization/archive/) |
@@ -76,10 +76,10 @@ RUN --mount=type=bind,target=/src,rw \
   --mount=type=cache,target=/root/.cache/go-build \
   --mount=target=/go/pkg/mod,type=cache \
   goreleaser-xx --debug \
-    --name "myapp" \
-    --dist "/out" \
-    --before-hooks="go mod tidy" \
-    --before-hooks="go mod download" \
+    --name="myapp" \
+    --dist="/out" \
+    --hooks="go mod tidy" \
+    --hooks="go mod download" \
     --ldflags="-s -w -X 'main.version={{.Version}}'" \
     --files="LICENSE" \
     --files="README.md"

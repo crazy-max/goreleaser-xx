@@ -21,16 +21,16 @@ var (
 
 // Cli holds command line args, flags and cmds
 type Cli struct {
-	Version     kong.VersionFlag
-	Debug       bool     `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
-	GitRef      string   `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
-	GoReleaser  string   `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
-	Name        string   `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
-	Dist        string   `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
-	BeforeHooks []string `kong:"name='before-hooks',env='GORELEASER_BEFORE_HOOKS',help='Hooks which will be executed before the build is started.'"`
-	Main        string   `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
-	Ldflags     string   `kong:"name='ldflags',env='GORELEASER_LDFLAGS',help='Custom ldflags templates.'"`
-	Files       []string `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
+	Version    kong.VersionFlag
+	Debug      bool     `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
+	GitRef     string   `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
+	GoReleaser string   `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
+	Name       string   `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
+	Dist       string   `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
+	Hooks      []string `kong:"name='hooks',env='GORELEASER_HOOKS',help='Hooks which will be executed before the build is started.'"`
+	Main       string   `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
+	Ldflags    string   `kong:"name='ldflags',env='GORELEASER_LDFLAGS',help='Custom ldflags templates.'"`
+	Files      []string `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
 }
 
 func main() {

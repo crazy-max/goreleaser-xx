@@ -16,7 +16,7 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 		ProjectName: cli.Name,
 		Dist:        cli.Dist,
 		Before: config.Before{
-			Hooks: cli.BeforeHooks,
+			Hooks: cli.Hooks,
 		},
 		Builds: []config.Build{
 			{
