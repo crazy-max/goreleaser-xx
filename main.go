@@ -99,9 +99,7 @@ func main() {
 
 	// Validate
 	gitDirty := isGitDirty()
-	log.Printf("INF: git dirty: %t", gitDirty)
 	gitWrongRef := isWrongRef(gitTag)
-	log.Printf("INF: git wrong ref: %t", gitWrongRef)
 	if gitDirty || gitWrongRef || cli.Snapshot {
 		grFlags = append(grFlags, "--snapshot")
 	}
