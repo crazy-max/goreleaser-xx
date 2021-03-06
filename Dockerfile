@@ -36,6 +36,7 @@ RUN --mount=type=bind,target=/src,rw \
     *) gitTag="0.0.0" ;; \
   esac \
   && go build -v -ldflags "-w -s -X 'main.version=${gitTag}'" -o /usr/local/bin/goreleaser-xx \
+  && goreleaser-xx --help \
   && goreleaser-xx --version
 
 FROM scratch AS release
@@ -51,7 +52,10 @@ ARG GIT_REF
 RUN git clone https://github.com/crazy-max/yasu .
 ARG TARGETPLATFORM
 RUN goreleaser-xx --debug \
-  --name goreleaser \
-  --dist /out \
+  --name="goreleaser" \
+  --dist="/out" \
+  --before-hooks="go mod tidy" \
+  --before-hooks="go mod download" \
   --ldflags="-s -w -X 'main.version={{.Version}}'" \
-  --files "LICENSE,README.md"
+  --files="LICENSE" \
+  --files="README.md"

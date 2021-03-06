@@ -15,6 +15,9 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 	b, err := yaml.Marshal(&config.Project{
 		ProjectName: cli.Name,
 		Dist:        cli.Dist,
+		Before: config.Before{
+			Hooks: cli.BeforeHooks,
+		},
 		Builds: []config.Build{
 			{
 				Main: cli.Main,
