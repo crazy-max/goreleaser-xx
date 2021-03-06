@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.159.0-r2 (2021/03/07)
+
+* Fix `GORELEASER_CURRENT_TAG`
+
 ## 0.159.0-r1 (2021/03/06)
 
 * Add snapshot option

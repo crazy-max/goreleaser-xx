@@ -87,7 +87,7 @@ func main() {
 
 	// Git tag
 	if strings.HasPrefix(cli.GitRef, "refs/tags/v") {
-		if err := os.Setenv("GORELEASER_CURRENT_TAG", strings.TrimLeft(cli.GitRef, "refs/tags/v")); err != nil {
+		if err := os.Setenv("GORELEASER_CURRENT_TAG", strings.TrimLeft(cli.GitRef, "refs/tags/")); err != nil {
 			log.Printf("WARN: cannot set GORELEASER_CURRENT_TAG env var: %v", err)
 		}
 	}
