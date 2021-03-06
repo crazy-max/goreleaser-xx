@@ -57,7 +57,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--dist`          | `GORELEASER_DIST`         | Dist folder where artifact will be stored |
 | `--hooks`         | `GORELEASER_HOOKS`        | [Hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
 | `--main`          | `GORELEASER_MAIN`         | Path to main.go file or main package (default `.`) |
-| `--ldflags`       | `GORELEASER_LDFLAGS`      | Custom ldflags templates the colorized output |
+| `--ldflags`       | `GORELEASER_LDFLAGS`      | Custom ldflags templates |
 | `--files`         | `GORELEASER_FILES`        | Additional files/template/globs you want to add to the [archive](https://goreleaser.com/customization/archive/) |
 
 ## Usage
