@@ -53,7 +53,7 @@ func getGitTag() (string, error) {
 	return tag, err
 }
 
-func getGitDirty(tag string) bool {
+func isGitDirty(tag string) bool {
 	if _, err := git("describe", "--exact-match", "--tags", "--match", tag); err != nil {
 		return true
 	}

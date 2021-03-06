@@ -90,7 +90,7 @@ func main() {
 	log.Printf("INF: git tag found: %s", gitTag)
 
 	// Check Git dirty
-	gitDirty := getGitDirty(gitTag)
+	gitDirty := isGitDirty(gitTag)
 	if gitDirty {
 		grFlags = append(grFlags, "--snapshot")
 	}
