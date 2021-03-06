@@ -14,53 +14,40 @@ type Target struct {
 }
 
 func getTarget() (tgt Target) {
+	var variant string
+
 	if targetPlatform := os.Getenv("TARGETPLATFORM"); targetPlatform != "" {
 		stp := strings.Split(targetPlatform, "/")
-		goos, goarch := stp[0], stp[1]
-		if goos != "" && goarch != "" {
-			tgt.Os = goos
-			tgt.Arch = goarch
-			if goarch == "arm" {
-				switch stp[2] {
-				case "v5":
-					tgt.Arm = "5"
-				case "v6":
-					tgt.Arm = "6"
-				default:
-					tgt.Arm = "7"
-				}
-			}
+		tgt.Os, tgt.Arch = stp[0], stp[1]
+		if len(stp) == 3 {
+			variant = stp[2]
 		}
 	}
 
 	if targetOs := os.Getenv("TARGETOS"); targetOs != "" {
 		tgt.Os = targetOs
 	}
-
 	if targetArch := os.Getenv("TARGETARCH"); targetArch != "" {
 		tgt.Arch = targetArch
 	}
+	if targetVariant := os.Getenv("TARGETVARIANT"); targetVariant != "" {
+		variant = targetVariant
+	}
 
-	if tgt.Arch == "arm" {
-		if targetVariant := os.Getenv("TARGETVARIANT"); targetVariant != "" {
-			if tgt.Arch == "arm" {
-				switch targetVariant {
-				case "v5":
-					tgt.Arm = "5"
-				case "v6":
-					tgt.Arm = "6"
-				default:
-					tgt.Arm = "7"
-				}
-			}
-		} else {
+	if tgt.Arch == "arm" && len(variant) > 0 {
+		switch variant {
+		case "v5":
+			tgt.Arm = "5"
+		case "v6":
+			tgt.Arm = "6"
+		default:
 			tgt.Arm = "7"
 		}
 	}
 
 	if strings.HasPrefix(tgt.Arch, "mips") {
-		if targetVariant := os.Getenv("TARGETVARIANT"); targetVariant != "" {
-			tgt.Mips = targetVariant
+		if len(variant) > 0 {
+			tgt.Mips = variant
 		} else {
 			tgt.Mips = "hardfloat"
 		}
