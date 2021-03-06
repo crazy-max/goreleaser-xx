@@ -62,6 +62,13 @@ func main() {
 		os.Exit(0)
 	}()
 
+	if cli.Debug {
+		log.Println("DBG: environment:")
+		for _, e := range os.Environ() {
+			log.Printf("  %s", e)
+		}
+	}
+
 	// Compiler target
 	target := getTarget()
 	if cli.Debug {
