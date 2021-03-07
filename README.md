@@ -21,6 +21,8 @@ ___
 * [Image](#image)
 * [CLI](#cli)
 * [Usage](#usage)
+  * [Minimal](#minimal)
+  * [Multi-platform image](#multi-platform-image)
 * [Build](#build)
 * [How can I help?](#how-can-i-help)
 * [License](#license)
@@ -63,19 +65,24 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 
 ## Usage
 
+### Minimal
+
+In the following example we are going to build a simple Go application against `linux/amd64`, `linux/arm64`,
+`linux/arm/v7`, `windows/amd64` and `darwin/amd64` platforms using `goreleaser-xx` and
+[buildx](https://github.com/docker/buildx).
+
 ```Dockerfile
 # syntax=docker/dockerfile:1.2
 
-FROM crazymax/goreleaser-xx:latest AS goreleaser-xx
-FROM golang:alpine AS base
+FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
+FROM --platform=$BUILDPLATFORM golang:alpine AS base
 COPY --from=goreleaser-xx / /
+RUN apk add --no-cache git
 WORKDIR /src
 
 FROM base AS build
 ARG TARGETPLATFORM
-RUN --mount=type=bind,target=/src,rw \
-  --mount=type=cache,target=/root/.cache/go-build \
-  --mount=target=/go/pkg/mod,type=cache \
+RUN --mount=type=bind,source=.,target=/src,rw 
   goreleaser-xx --debug \
     --name="myapp" \
     --dist="/out" \
@@ -85,21 +92,22 @@ RUN --mount=type=bind,target=/src,rw \
     --files="LICENSE" \
     --files="README.md"
 
-FROM scratch AS artifacts
+FROM scratch AS artifact
 COPY --from=build /out/*.tar.gz /
 COPY --from=build /out/*.zip /
 ```
 
-With the following buildx build command:
+Now let's build with buildx:
 
 ```shell
 docker buildx build \
   --platform "linux/amd64,linux/arm64,linux/arm/v7,windows/amd64,darwin/amd64" \
   --output "type=local,dest=./dist" \
+  --target "artifact" \
   --file "./Dockerfile" .
 ```
 
-The following archives will be available in `./dist`:
+Archives created by GoReleaser will be available in `./dist`:
 
 ```text
 ./dist
@@ -115,46 +123,104 @@ The following archives will be available in `./dist`:
   └── myapp_v1.0.0-SNAPSHOT-00655a9_windows_x86_64.zip
 ```
 
-Here is an example of the generated `.goreleaser.yml` for `linux/arm/v7` platform:
+<details>
+  <summary><b>Example of generated .goreleaser.yml for linux/arm/v7 platform</b></summary>
 
-```yaml
-project_name: myapp
-release:
-  disable: true
-builds:
-- goos:
-  - linux
-  goarch:
-  - arm
-  goarm:
-  - "7"
-  gomips:
-  - ""
-  main: .
-  ldflags:
-  - -s -w -X 'main.version={{.Version}}'
-  hooks:
-    post:
-    - cmd: cp "{{ .Path }}" /usr/local/bin/goreleaser
-  env:
-  - CGO_ENABLED=0
-archives:
-- replacements:
-    "386": i386
-    amd64: x86_64
-  format_overrides:
-  - goos: windows
-    format: zip
-  files:
-  - LICENSE
-  - README.md
-  allow_different_binary_count: false
-dist: /out
-before:
-  hooks:
-  - go mod tidy
-  - go mod download
+  ```yaml
+  project_name: myapp
+  release:
+    disable: true
+  builds:
+  - goos:
+    - linux
+    goarch:
+    - arm
+    goarm:
+    - "7"
+    gomips:
+    - ""
+    main: .
+    ldflags:
+    - -s -w -X 'main.version={{.Version}}'
+    hooks:
+      post:
+      - cmd: cp "{{ .Path }}" /usr/local/bin/myapp
+    env:
+    - CGO_ENABLED=0
+  archives:
+  - replacements:
+      "386": i386
+      amd64: x86_64
+    format_overrides:
+    - goos: windows
+      format: zip
+    files:
+    - LICENSE
+    - README.md
+    allow_different_binary_count: false
+  dist: /out
+  before:
+    hooks:
+    - go mod tidy
+    - go mod download
+  ```
+</details>
+
+### Multi-platform image
+
+We can enhance the previous example to also create a multi-platform image in addition to the generated artifacts:
+
+```Dockerfile
+# syntax=docker/dockerfile:1.2
+
+FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
+FROM --platform=$BUILDPLATFORM golang:alpine AS base
+COPY --from=goreleaser-xx / /
+RUN apk add --no-cache git
+WORKDIR /src
+
+FROM base AS build
+ARG TARGETPLATFORM
+RUN --mount=type=bind,source=.,target=/src,rw 
+  goreleaser-xx --debug \
+    --name="myapp" \
+    --dist="/out" \
+    --hooks="go mod tidy" \
+    --hooks="go mod download" \
+    --ldflags="-s -w -X 'main.version={{.Version}}'" \
+    --files="LICENSE" \
+    --files="README.md"
+
+FROM scratch AS artifact
+COPY --from=build /out/*.tar.gz /
+COPY --from=build /out/*.zip /
+
+FROM alpine:3.13 AS image
+RUN apk --update --no-cache add ca-certificates libressl shadow
+  && addgroup -g 1000 myapp \
+  && adduser -u 1000 -G myapp -s /sbin/nologin -D myapp
+COPY --from=build /usr/local/bin/myapp /usr/local/bin/myapp
+USER myapp
+EXPOSE 8080
+ENTRYPOINT [ "myapp" ]
 ```
+
+As you can see, we have added a new stage called `image`. The artifact of each platform is available with
+`goreleaser-xx` in `/usr/local/bin/{name}` (`build` stage) and will be retrieved and included in your `image` stage
+through `COPY --from=build` instruction.
+
+Now let's build, tag and push our multi-platform image in our favorite registry with buildx:
+
+```shell
+docker buildx build \
+  --tag "user/myapp:latest" \
+  --platform "linux/amd64,linux/arm64,linux/arm/v7" \
+  --target "image" \
+  --push \
+  --file "./Dockerfile" .
+```
+> `windows/amd64` and `darwin/amd64` platforms have been removed here
+> because `alpine:3.13` does not support them.
 
 ## Build
 
