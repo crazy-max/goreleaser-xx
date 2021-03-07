@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.159.0-r3 (2021/03/07)
+
+* Do not fail on Git tag not found (#2)
+* Improve usage examples
+
 ## 0.159.0-r2 (2021/03/07)
 
 * Fix `GORELEASER_CURRENT_TAG`
