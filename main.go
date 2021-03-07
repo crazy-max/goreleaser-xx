@@ -93,18 +93,17 @@ func main() {
 	}
 	gitTag, err := getGitTag()
 	if err != nil {
-		log.Fatalf("ERR: %v", err)
+		gitTag = "v0.0.0"
 	}
-	log.Printf("INF: git tag found: %s", gitTag)
 
-	// Validate
+	// Git validate
 	gitDirty := isGitDirty()
 	gitWrongRef := isWrongRef(gitTag)
 	if gitDirty || gitWrongRef || cli.Snapshot {
 		grFlags = append(grFlags, "--snapshot")
 	}
 
-	// Display status
+	// Git status
 	log.Println("INF: git status:")
 	log.Printf("  tag=%s", gitTag)
 	log.Printf("  dirty=%t", gitDirty)
