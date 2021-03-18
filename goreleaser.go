@@ -55,6 +55,9 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 				Files: cli.Files,
 			},
 		},
+		Checksum: config.Checksum{
+			Disable: true,
+		},
 		Release: config.Release{
 			Disable: true,
 		},
