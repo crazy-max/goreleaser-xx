@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-ARG GORELEASER_VERSION=0.159.0
+ARG GORELEASER_VERSION=0.160.0
 ARG GO_VERSION=1.16
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:golang AS xgo
