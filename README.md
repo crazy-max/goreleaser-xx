@@ -82,7 +82,7 @@ WORKDIR /src
 
 FROM base AS build
 ARG TARGETPLATFORM
-RUN --mount=type=bind,source=.,target=/src,rw 
+RUN --mount=type=bind,source=.,target=/src,rw \
   goreleaser-xx --debug \
     --name="myapp" \
     --dist="/out" \
@@ -181,7 +181,7 @@ WORKDIR /src
 
 FROM base AS build
 ARG TARGETPLATFORM
-RUN --mount=type=bind,source=.,target=/src,rw 
+RUN --mount=type=bind,source=.,target=/src,rw \
   goreleaser-xx --debug \
     --name="myapp" \
     --dist="/out" \
@@ -196,7 +196,7 @@ COPY --from=build /out/*.tar.gz /
 COPY --from=build /out/*.zip /
 
 FROM alpine:3.13 AS image
-RUN apk --update --no-cache add ca-certificates libressl shadow
+RUN apk --update --no-cache add ca-certificates libressl shadow \
   && addgroup -g 1000 myapp \
   && adduser -u 1000 -G myapp -s /sbin/nologin -D myapp
 COPY --from=build /usr/local/bin/myapp /usr/local/bin/myapp
