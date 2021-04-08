@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.2
-ARG GORELEASER_VERSION=0.161.1
-ARG GO_VERSION=1.16
+ARG GORELEASER_VERSION
+ARG GO_VERSION
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:golang AS xgo
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
