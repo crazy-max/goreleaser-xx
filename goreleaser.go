@@ -28,9 +28,7 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 				Goarch: []string{target.Arch},
 				Goarm:  []string{target.Arm},
 				Gomips: []string{target.Mips},
-				Env: []string{
-					"CGO_ENABLED=0",
-				},
+				Env:    append([]string{"CGO_ENABLED=0"}, cli.Envs...),
 				Hooks: config.HookConfig{
 					Post: []config.BuildHook{
 						{

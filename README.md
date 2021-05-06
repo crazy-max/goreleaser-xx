@@ -61,6 +61,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--main`          | `GORELEASER_MAIN`         | Path to main.go file or main package (default `.`) |
 | `--ldflags`       | `GORELEASER_LDFLAGS`      | Custom ldflags templates |
 | `--files`         | `GORELEASER_FILES`        | Additional files/template/globs you want to add to the [archive](https://goreleaser.com/customization/archive/) |
+| `--envs`          | `GORELEASER_ENVS`         | Custom environment variables to be set during the build |
 | `--snapshot`      | `GORELEASER_SNAPSHOT`     | Run in [snapshot](https://goreleaser.com/customization/snapshots/) mode |
 
 ## Usage
@@ -90,7 +91,9 @@ RUN --mount=type=bind,source=.,target=/src,rw \
     --hooks="go mod download" \
     --ldflags="-s -w -X 'main.version={{.Version}}'" \
     --files="LICENSE" \
-    --files="README.md"
+    --files="README.md" \
+    --envs="FOO=bar" \
+    --envs="BAR=foo"
 
 FROM scratch AS artifact
 COPY --from=build /out/*.tar.gz /
@@ -147,6 +150,8 @@ Archives created by GoReleaser will be available in `./dist`:
       - cmd: cp "{{ .Path }}" /usr/local/bin/myapp
     env:
     - CGO_ENABLED=0
+    - FOO=bar
+    - BAR=foo
   archives:
   - replacements:
       "386": i386

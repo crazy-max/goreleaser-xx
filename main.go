@@ -31,6 +31,7 @@ type Cli struct {
 	Main       string   `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
 	Ldflags    string   `kong:"name='ldflags',env='GORELEASER_LDFLAGS',help='Custom ldflags templates.'"`
 	Files      []string `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
+	Envs       []string `kong:"name='envs',env='GORELEASER_ENVS',help='Custom environment variables to be set during the build.'"`
 	Snapshot   bool     `kong:"name='snapshot',env='GORELEASER_SNAPSHOT',default='false',help='Run in snapshot mode.'"`
 }
 
