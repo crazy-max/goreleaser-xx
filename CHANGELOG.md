@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.164.0-r1 (2021/05/06)
+
+* Add `env` option
+
 ## 0.164.0-r0 (2021/04/25)
 
 * GoReleaser 0.164.0
