@@ -57,12 +57,14 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--goreleaser`    | `GORELEASER_PATH`         | Path to GoReleaser binary (default `/opt/goreleaser-xx/goreleaser`) |
 | `--name`          | `GORELEASER_NAME`         | Project name |
 | `--dist`          | `GORELEASER_DIST`         | Dist folder where artifact will be stored |
+| `--artifact-type` | `GORELEASER_ARTIFACTTYPE` | Which type of artifact to create. Can be `all`, `archive` or `bin`. (default `archive`) |
 | `--hooks`         | `GORELEASER_HOOKS`        | [Hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
 | `--main`          | `GORELEASER_MAIN`         | Path to main.go file or main package (default `.`) |
 | `--ldflags`       | `GORELEASER_LDFLAGS`      | Custom ldflags templates |
 | `--files`         | `GORELEASER_FILES`        | Additional files/template/globs you want to add to the [archive](https://goreleaser.com/customization/archive/) |
 | `--envs`          | `GORELEASER_ENVS`         | Custom environment variables to be set during the build |
 | `--snapshot`      | `GORELEASER_SNAPSHOT`     | Run in [snapshot](https://goreleaser.com/customization/snapshots/) mode |
+| `--checksum`      | `GORELEASER_CHECKSUM`     | Create checksum (default `true`) |
 
 ## Usage
 
@@ -84,6 +86,8 @@ WORKDIR /src
 FROM base AS build
 ARG TARGETPLATFORM
 RUN --mount=type=bind,source=.,target=/src,rw \
+  --mount=type=cache,target=/root/.cache/go-build \
+  --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
     --name="myapp" \
     --dist="/out" \
@@ -96,8 +100,7 @@ RUN --mount=type=bind,source=.,target=/src,rw \
     --envs="BAR=foo"
 
 FROM scratch AS artifact
-COPY --from=build /out/*.tar.gz /
-COPY --from=build /out/*.zip /
+COPY --from=build /out /
 ```
 
 Now let's build with buildx:
@@ -115,61 +118,21 @@ Archives created by GoReleaser will be available in `./dist`:
 ```text
 ./dist
 ├── darwin_amd64
-│ └── myapp_v1.0.0-SNAPSHOT-00655a9_darwin_x86_64.tar.gz
+│ ├── myapp_v1.0.0-SNAPSHOT-00655a9_darwin_x86_64.tar.gz
+│ └── myapp_v1.0.0-SNAPSHOT-00655a9_darwin_x86_64.tar.gz.sha256
 ├── linux_amd64
-│ └── myapp_v1.0.0-SNAPSHOT-00655a9_linux_x86_64.tar.gz
+│ ├── myapp_v1.0.0-SNAPSHOT-00655a9_linux_x86_64.tar.gz
+│ └── myapp_v1.0.0-SNAPSHOT-00655a9_linux_x86_64.tar.gz.sha256
 ├── linux_arm64
-│ └── myapp_v1.0.0-SNAPSHOT-00655a9_linux_arm64.tar.gz
+│ ├── myapp_v1.0.0-SNAPSHOT-00655a9_linux_arm64.tar.gz
+│ └── myapp_v1.0.0-SNAPSHOT-00655a9_linux_arm64.tar.gz.sha256
 ├── linux_arm_v7
-│ └── myapp_v1.0.0-SNAPSHOT-00655a9_linux_armv7.tar.gz
+│ ├── myapp_v1.0.0-SNAPSHOT-00655a9_linux_armv7.tar.gz
+│ └── myapp_v1.0.0-SNAPSHOT-00655a9_linux_armv7.tar.gz.sha256
 └── windows_amd64
-  └── myapp_v1.0.0-SNAPSHOT-00655a9_windows_x86_64.zip
+│ ├── myapp_v1.0.0-SNAPSHOT-00655a9_windows_x86_64.tar.gz
+│ └── myapp_v1.0.0-SNAPSHOT-00655a9_windows_x86_64.tar.gz.sha256
 ```
-
-<details>
-  <summary><b>Example of generated .goreleaser.yml for linux/arm/v7 platform</b></summary>
-
-  ```yaml
-  project_name: myapp
-  release:
-    disable: true
-  builds:
-  - goos:
-    - linux
-    goarch:
-    - arm
-    goarm:
-    - "7"
-    gomips:
-    - ""
-    main: .
-    ldflags:
-    - -s -w -X 'main.version={{.Version}}'
-    hooks:
-      post:
-      - cmd: cp "{{ .Path }}" /usr/local/bin/myapp
-    env:
-    - CGO_ENABLED=0
-    - FOO=bar
-    - BAR=foo
-  archives:
-  - replacements:
-      "386": i386
-      amd64: x86_64
-    format_overrides:
-    - goos: windows
-      format: zip
-    files:
-    - LICENSE
-    - README.md
-    allow_different_binary_count: false
-  dist: /out
-  before:
-    hooks:
-    - go mod tidy
-    - go mod download
-  ```
-</details>
 
 ### Multi-platform image
 
@@ -187,6 +150,8 @@ WORKDIR /src
 FROM base AS build
 ARG TARGETPLATFORM
 RUN --mount=type=bind,source=.,target=/src,rw \
+  --mount=type=cache,target=/root/.cache/go-build \
+  --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
     --name="myapp" \
     --dist="/out" \
@@ -197,8 +162,7 @@ RUN --mount=type=bind,source=.,target=/src,rw \
     --files="README.md"
 
 FROM scratch AS artifact
-COPY --from=build /out/*.tar.gz /
-COPY --from=build /out/*.zip /
+COPY --from=build /out /
 
 FROM alpine:3.13 AS image
 RUN apk --update --no-cache add ca-certificates libressl shadow \

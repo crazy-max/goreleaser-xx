@@ -44,18 +44,29 @@ LABEL maintainer="CrazyMax"
 COPY --from=goreleaser /goreleaser/goreleaser /opt/goreleaser-xx/goreleaser
 COPY --from=build /usr/local/bin/goreleaser-xx /usr/bin/goreleaser-xx
 
-FROM golang:1.14-alpine AS test
+FROM --platform=$BUILDPLATFORM golang:1.16-alpine AS test
 RUN apk --no-cache add git
-COPY --from=release / /
 WORKDIR /src
 ARG GIT_REF
-RUN git clone https://github.com/crazy-max/yasu .
+RUN git clone https://github.com/crazy-max/ddns-route53 .
+COPY --from=release / /
 ARG TARGETPLATFORM
 RUN goreleaser-xx --debug \
-  --name="goreleaser" \
-  --dist="/out" \
-  --hooks="go mod tidy" \
-  --hooks="go mod download" \
-  --ldflags="-s -w -X 'main.version={{.Version}}'" \
-  --files="LICENSE" \
-  --files="README.md"
+    --name="ddns-route53" \
+    --dist="/dist" \
+    --artifact-type="all" \
+    --hooks="go mod tidy" \
+    --hooks="go mod download" \
+    --main="./cmd/main.go" \
+    --ldflags="-s -w -X 'main.version={{.Version}}'" \
+    --files="CHANGELOG.md" \
+    --files="LICENSE" \
+    --files="README.md" \
+  && ls -al /dist/
+
+FROM scratch AS test-artifact
+COPY --from=test /dist /
+
+FROM alpine AS test-image
+COPY --from=test /usr/local/bin/ddns-route53 /usr/local/bin/ddns-route53
+RUN ddns-route53 --version

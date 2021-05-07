@@ -55,3 +55,14 @@ target "test" {
   inherits = ["args", "ghaction-docker-meta"]
   target = "test"
 }
+
+target "test-artifact" {
+  inherits = ["test"]
+  target = "test-artifact"
+  output = ["./dist"]
+}
+
+target "test-image" {
+  inherits = ["test"]
+  target = "test-image"
+}
