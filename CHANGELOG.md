@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.164.0-r2 (2021/05/07)
+
+* Add `artifact-type` and `checksum` options (#11)
+
 ## 0.164.0-r1 (2021/05/06)
 
 * Add `env` option
