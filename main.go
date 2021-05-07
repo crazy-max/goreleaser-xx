@@ -129,12 +129,12 @@ func main() {
 	// Post build
 	distFolder, err := os.Open(cli.Dist)
 	if err != nil {
-		log.Printf("WARN: cannot open dist foler: %v", err)
+		log.Printf("WARN: cannot open dist folder: %v", err)
 	}
 	defer distFolder.Close()
 	names, err := distFolder.Readdir(-1)
 	if err != nil {
-		log.Printf("WARN: cannot read dist foler: %v", err)
+		log.Printf("WARN: cannot read dist folder: %v", err)
 	}
 	for _, name := range names {
 		if name.IsDir() {
