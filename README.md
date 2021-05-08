@@ -57,11 +57,12 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--goreleaser`    | `GORELEASER_PATH`         | Path to GoReleaser binary (default `/opt/goreleaser-xx/goreleaser`) |
 | `--name`          | `GORELEASER_NAME`         | Project name |
 | `--dist`          | `GORELEASER_DIST`         | Dist folder where artifact will be stored |
-| `--artifact-type` | `GORELEASER_ARTIFACTTYPE` | Which type of artifact to create. Can be `all`, `archive` or `bin`. (default `archive`) |
+| `--artifact-type` | `GORELEASER_ARTIFACTTYPE` | Which type of artifact to create. Can be `archive` or `bin`. (default `archive`) |
 | `--hooks`         | `GORELEASER_HOOKS`        | [Hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
 | `--main`          | `GORELEASER_MAIN`         | Path to main.go file or main package (default `.`) |
 | `--ldflags`       | `GORELEASER_LDFLAGS`      | Custom ldflags templates |
 | `--files`         | `GORELEASER_FILES`        | Additional files/template/globs you want to add to the [archive](https://goreleaser.com/customization/archive/) |
+| `--replacements`  | `GORELEASER_REPLACEMENTS` | Replacements for `GOOS` and `GOARCH` in the archive/binary name. |
 | `--envs`          | `GORELEASER_ENVS`         | Custom environment variables to be set during the build |
 | `--snapshot`      | `GORELEASER_SNAPSHOT`     | Run in [snapshot](https://goreleaser.com/customization/snapshots/) mode |
 | `--checksum`      | `GORELEASER_CHECKSUM`     | Create checksum (default `true`) |
@@ -96,6 +97,8 @@ RUN --mount=type=bind,source=.,target=/src,rw \
     --ldflags="-s -w -X 'main.version={{.Version}}'" \
     --files="LICENSE" \
     --files="README.md" \
+    --replacements="386=i386" \
+    --replacements="amd64=x86_64" \
     --envs="FOO=bar" \
     --envs="BAR=foo"
 

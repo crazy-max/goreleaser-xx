@@ -54,7 +54,6 @@ ARG TARGETPLATFORM
 RUN goreleaser-xx --debug \
     --name="ddns-route53" \
     --dist="/dist" \
-    --artifact-type="all" \
     --hooks="go mod tidy" \
     --hooks="go mod download" \
     --main="./cmd/main.go" \
@@ -62,6 +61,8 @@ RUN goreleaser-xx --debug \
     --files="CHANGELOG.md" \
     --files="LICENSE" \
     --files="README.md" \
+    --replacements="386=i386" \
+    --replacements="amd64=x86_64" \
   && ls -al /dist/
 
 FROM scratch AS test-artifact

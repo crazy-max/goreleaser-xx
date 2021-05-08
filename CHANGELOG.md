@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.164.0-r4 (2021/05/08)
+
+* Add `replacements` option
+* `artifact-type` can be `archive` or `bin`
+
 ## 0.164.0-r3 (2021/05/08)
 
 * Skip changelog
