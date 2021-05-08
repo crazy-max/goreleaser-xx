@@ -74,6 +74,9 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 		Release: config.Release{
 			Disable: true,
 		},
+		Changelog: config.Changelog{
+			Skip: true,
+		},
 	})
 	if err != nil {
 		return "", err
