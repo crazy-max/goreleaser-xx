@@ -21,8 +21,8 @@ target "args" {
   }
 }
 
-// Special target: https://github.com/crazy-max/ghaction-docker-meta#bake-definition
-target "ghaction-docker-meta" {
+// Special target: https://github.com/docker/metadata-action#bake-definition
+target "docker-metadata-action" {
   tags = ["goreleaser-xx:local"]
 }
 
@@ -31,7 +31,7 @@ group "default" {
 }
 
 target "image" {
-  inherits = ["args", "ghaction-docker-meta"]
+  inherits = ["args", "docker-metadata-action"]
   target = "release"
 }
 
@@ -52,7 +52,7 @@ target "image-all" {
 }
 
 target "test" {
-  inherits = ["args", "ghaction-docker-meta"]
+  inherits = ["args", "docker-metadata-action"]
   target = "test"
 }
 
