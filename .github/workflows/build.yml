@@ -50,7 +50,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
       -
         name: Test
-        uses: docker/bake-action@v1
+        uses: docker/bake-action@v1.4.0
         with:
           targets: test
       -
@@ -70,7 +70,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Build
-        uses: docker/bake-action@v1
+        uses: docker/bake-action@v1.4.0
         with:
           files: |
             ./docker-bake.hcl
