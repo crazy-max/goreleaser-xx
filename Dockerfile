@@ -20,13 +20,16 @@ RUN --mount=type=cache,target=/go/pkg/mod \
   && go build -v -ldflags "-w -s -X 'main.version=${GORELEASER_VERSION}' -X main.builtBy=goreleaser-xx" \
   && ./goreleaser --version
 
-FROM base AS gomod
-ARG TARGETPLATFORM
+FROM base AS vendored
 RUN --mount=type=bind,target=.,rw \
   --mount=type=cache,target=/go/pkg/mod \
-  go mod tidy && go mod download
+  go mod tidy && go mod download && \
+  mkdir /out && cp go.mod go.sum /out
 
-FROM gomod AS build
+FROM scratch AS vendor-update
+COPY --from=vendored /out /
+
+FROM vendored AS build
 ARG GIT_REF
 ARG TARGETPLATFORM
 RUN --mount=type=bind,target=/src,rw \

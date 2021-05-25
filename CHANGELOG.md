@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.165.0-r0 (2021/05/25)
+
+* GoReleaser 0.165.0
+
 ## 0.164.0-r4 (2021/05/08)
 
 * Add `replacements` option
