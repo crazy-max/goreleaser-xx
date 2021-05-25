@@ -5,7 +5,7 @@ variable "GITHUB_REF" {
 
 // GoReleaser version
 variable "GORELEASER_VERSION" {
-  default = "0.164.0"
+  default = "0.165.0"
 }
 
 // Go version to build GoReleaser and goreleaser-xx
@@ -49,6 +49,12 @@ target "image-all" {
     "linux/arm64",
     "linux/386"
   ]
+}
+
+target "vendor-update" {
+  inherits = ["args"]
+  target = "vendor-update"
+  output = ["."]
 }
 
 target "test" {
