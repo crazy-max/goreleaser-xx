@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/alecthomas/kong v0.2.16
-	github.com/goreleaser/goreleaser v0.166.2
+	github.com/goreleaser/goreleaser v0.167.0
 	github.com/pkg/errors v0.9.1
 	gopkg.in/yaml.v2 v2.4.0
 )
