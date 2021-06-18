@@ -1,4 +1,4 @@
-## Contributing
+# Contributing
 
 Contributions to this project are [released](https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license)
 to the public under the [project's open source license](../LICENSE).
