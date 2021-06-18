@@ -1,12 +1,17 @@
 # Changelog
 
+## 0.169.0-r0 (2021/06/18)
+
+* GoReleaser 0.169.0 (#29)
+* Bump github.com/alecthomas/kong from 0.2.16 to 0.2.17 (#28)
+
 ## 0.166.2-r0 (2021/05/31)
 
-* GoReleaser 0.166.2
+* GoReleaser 0.166.2 (#24)
 
 ## 0.165.0-r0 (2021/05/25)
 
-* GoReleaser 0.165.0
+* GoReleaser 0.165.0 (#20)
 
 ## 0.164.0-r4 (2021/05/08)
 
