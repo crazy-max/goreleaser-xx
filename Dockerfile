@@ -43,7 +43,6 @@ RUN --mount=type=bind,target=/src,rw \
   && goreleaser-xx --version
 
 FROM scratch AS release
-LABEL maintainer="CrazyMax"
 COPY --from=goreleaser /goreleaser/goreleaser /opt/goreleaser-xx/goreleaser
 COPY --from=build /usr/local/bin/goreleaser-xx /usr/bin/goreleaser-xx
 
