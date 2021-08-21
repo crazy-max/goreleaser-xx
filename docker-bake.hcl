@@ -10,7 +10,7 @@ variable "GORELEASER_VERSION" {
 
 // Go version to build GoReleaser and goreleaser-xx
 variable "GO_VERSION" {
-  default = "1.16"
+  default = "1.17"
 }
 
 target "args" {
