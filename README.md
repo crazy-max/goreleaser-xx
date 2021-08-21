@@ -167,8 +167,8 @@ RUN --mount=type=bind,source=.,target=/src,rw \
 FROM scratch AS artifact
 COPY --from=build /out /
 
-FROM alpine:3.13 AS image
-RUN apk --update --no-cache add ca-certificates libressl shadow \
+FROM alpine:3.14 AS image
+RUN apk --update --no-cache add ca-certificates openssl shadow \
   && addgroup -g 1000 myapp \
   && adduser -u 1000 -G myapp -s /sbin/nologin -D myapp
 COPY --from=build /usr/local/bin/myapp /usr/local/bin/myapp
@@ -192,7 +192,7 @@ docker buildx build \
   --file "./Dockerfile" .
 ```
 > `windows/amd64` and `darwin/amd64` platforms have been removed here
-> because `alpine:3.13` does not support them.
+> because `alpine:3.14` does not support them.
 
 ## Build
 
@@ -214,9 +214,8 @@ docker buildx bake image-all
 
 ## Contributing
 
-Want to contribute? Awesome! The most basic way to show your support is to star :star2: the project,
-or to raise issues :speech_balloon:. If you want to open a pull request, please read the
-[contributing guidelines](.github/CONTRIBUTING.md).
+Want to contribute? Awesome! The most basic way to show your support is to star the project, or to raise issues. If
+you want to open a pull request, please read the [contributing guidelines](.github/CONTRIBUTING.md).
 
 You can also support this project by [**becoming a sponsor on GitHub**](https://github.com/sponsors/crazy-max) or by
 making a [Paypal donation](https://www.paypal.me/crazyws) to ensure this journey continues indefinitely!

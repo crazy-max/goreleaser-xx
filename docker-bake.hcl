@@ -5,7 +5,7 @@ variable "GITHUB_REF" {
 
 // GoReleaser version
 variable "GORELEASER_VERSION" {
-  default = "0.173.2"
+  default = "0.175.0"
 }
 
 // Go version to build GoReleaser and goreleaser-xx
