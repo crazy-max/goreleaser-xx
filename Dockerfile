@@ -46,7 +46,7 @@ FROM scratch AS release
 COPY --from=goreleaser /goreleaser/goreleaser /opt/goreleaser-xx/goreleaser
 COPY --from=build /usr/local/bin/goreleaser-xx /usr/bin/goreleaser-xx
 
-FROM --platform=$BUILDPLATFORM golang:1.16-alpine AS test
+FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS test
 RUN apk --no-cache add git
 WORKDIR /src
 ARG GIT_REF

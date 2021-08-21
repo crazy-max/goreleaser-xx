@@ -12,6 +12,13 @@ import (
 )
 
 func getGRConfig(cli Cli, target Target) (string, error) {
+	var arFiles []config.File
+	for _, f := range cli.Files {
+		arFiles = append(arFiles, config.File{
+			Source: f,
+		})
+	}
+
 	b, err := yaml.Marshal(&config.Project{
 		ProjectName: cli.Name,
 		Dist:        cli.Dist,
@@ -47,7 +54,7 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 						Format: "zip",
 					},
 				},
-				Files: cli.Files,
+				Files: arFiles,
 			},
 		},
 		Checksum: config.Checksum{
