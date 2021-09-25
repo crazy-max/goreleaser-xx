@@ -5,7 +5,7 @@ variable "GITHUB_REF" {
 
 // GoReleaser version
 variable "GORELEASER_VERSION" {
-  default = "0.175.0"
+  default = "0.180.0"
 }
 
 // Go version to build GoReleaser and goreleaser-xx
@@ -13,7 +13,7 @@ variable "GO_VERSION" {
   default = "1.17"
 }
 
-target "args" {
+target "_commons" {
   args = {
     GIT_REF = GITHUB_REF
     GORELEASER_VERSION = GORELEASER_VERSION
@@ -31,7 +31,7 @@ group "default" {
 }
 
 target "image" {
-  inherits = ["args", "docker-metadata-action"]
+  inherits = ["_commons", "docker-metadata-action"]
   target = "release"
 }
 
@@ -52,13 +52,13 @@ target "image-all" {
 }
 
 target "vendor-update" {
-  inherits = ["args"]
+  inherits = ["_commons"]
   target = "vendor-update"
   output = ["."]
 }
 
 target "test" {
-  inherits = ["args", "docker-metadata-action"]
+  inherits = ["_commons", "docker-metadata-action"]
   target = "test"
 }
 
