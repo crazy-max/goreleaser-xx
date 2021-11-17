@@ -1,10 +1,11 @@
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1.3
+
 ARG GORELEASER_VERSION
 ARG GO_VERSION
 
-FROM --platform=$BUILDPLATFORM tonistiigi/xx:golang AS xgo
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.0.0 AS xx
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
-COPY --from=xgo / /
+COPY --from=xx / /
 RUN apk --update --no-cache add build-base git
 ARG GORELEASER_VERSION
 WORKDIR /goreleaser
@@ -17,7 +18,7 @@ ARG TARGETPLATFORM
 WORKDIR /goreleaser
 RUN --mount=type=cache,target=/go/pkg/mod \
   go mod tidy && go mod download \
-  && go build -v -ldflags "-w -s -X 'main.version=${GORELEASER_VERSION}' -X main.builtBy=goreleaser-xx" \
+  && xx-go build -v -ldflags "-w -s -X 'main.version=${GORELEASER_VERSION}' -X main.builtBy=goreleaser-xx" \
   && ./goreleaser --version
 
 FROM base AS vendored
@@ -38,7 +39,7 @@ RUN --mount=type=bind,target=/src,rw \
     refs/tags/v*) gitTag="${GIT_REF#refs/tags/v}" ;; \
     *) gitTag="0.0.0" ;; \
   esac \
-  && go build -v -ldflags "-w -s -X 'main.version=${gitTag}'" -o /usr/local/bin/goreleaser-xx \
+  && xx-go build -v -ldflags "-w -s -X 'main.version=${gitTag}'" -o /usr/local/bin/goreleaser-xx \
   && goreleaser-xx --help \
   && goreleaser-xx --version
 
