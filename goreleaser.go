@@ -36,8 +36,8 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 				Goarm:  []string{target.Arm},
 				Gomips: []string{target.Mips},
 				Env:    append([]string{"CGO_ENABLED=0"}, cli.Envs...),
-				Hooks: config.HookConfig{
-					Post: []config.BuildHook{
+				Hooks: config.BuildHookConfig{
+					Post: []config.Hook{
 						{
 							Cmd: `cp "{{ .Path }}" /usr/local/bin/{{ .ProjectName }}`,
 						},
