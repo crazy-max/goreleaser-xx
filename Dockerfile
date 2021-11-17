@@ -51,7 +51,7 @@ FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS test
 RUN apk --no-cache add git
 WORKDIR /src
 ARG GIT_REF
-RUN git clone https://github.com/crazy-max/ddns-route53 .
+RUN git clone --branch v2.7.0 https://github.com/crazy-max/ddns-route53 .
 COPY --from=release / /
 ARG TARGETPLATFORM
 RUN goreleaser-xx --debug \
