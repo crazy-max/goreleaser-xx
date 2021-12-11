@@ -28,21 +28,23 @@ var (
 
 // Cli holds command line args, flags and cmds
 type Cli struct {
-	Version      kong.VersionFlag
-	Debug        bool              `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
-	GitRef       string            `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
-	GoReleaser   string            `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
-	Name         string            `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
-	Dist         string            `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
-	ArtifactType string            `kong:"name='artifact-type',env='GORELEASER_ARTIFACTTYPE',enum='archive,bin',default='archive',help='Which type of artifact to create. Can be archive or bin.'"`
-	Hooks        []string          `kong:"name='hooks',env='GORELEASER_HOOKS',help='Hooks which will be executed before the build is started.'"`
-	Main         string            `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
-	Ldflags      string            `kong:"name='ldflags',env='GORELEASER_LDFLAGS',help='Custom ldflags templates.'"`
-	Files        []string          `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
-	Replacements map[string]string `kong:"name='replacements',env='GORELEASER_REPLACEMENTS',help='Replacements for GOOS and GOARCH in the archive/binary name.'"`
-	Envs         []string          `kong:"name='envs',env='GORELEASER_ENVS',help='Custom environment variables to be set during the build.'"`
-	Snapshot     bool              `kong:"name='snapshot',env='GORELEASER_SNAPSHOT',default='false',help='Run in snapshot mode.'"`
-	Checksum     bool              `kong:"name='checksum',env='GORELEASER_CHECKSUM',default='true',help='Create checksum.'"`
+	Version        kong.VersionFlag
+	Debug          bool              `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
+	GitRef         string            `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
+	GoReleaser     string            `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
+	Name           string            `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
+	Dist           string            `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
+	ArtifactType   string            `kong:"name='artifact-type',env='GORELEASER_ARTIFACTTYPE',enum='archive,bin',default='archive',help='Which type of artifact to create. Can be archive or bin.'"`
+	Hooks          []string          `kong:"name='hooks',env='GORELEASER_HOOKS',help='Global hooks which will be executed before the build is started.'"`
+	Main           string            `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
+	Ldflags        string            `kong:"name='ldflags',env='GORELEASER_LDFLAGS',help='Custom ldflags templates.'"`
+	Files          []string          `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
+	Replacements   map[string]string `kong:"name='replacements',env='GORELEASER_REPLACEMENTS',help='Replacements for GOOS and GOARCH in the archive/binary name.'"`
+	Envs           []string          `kong:"name='envs',env='GORELEASER_ENVS',help='Custom environment variables to be set during the build.'"`
+	BuildPreHooks  []string          `kong:"name='build-pre-hoosk',env='GORELEASER_BUILD_PRE_HOOKS',help='Hooks which will be executed before the build target.'"`
+	BuildPostHooks []string          `kong:"name='build-post-hooks',env='GORELEASER_BUILD_POST_HOOKS',help='Hooks which will be executed after the build target.'"`
+	Snapshot       bool              `kong:"name='snapshot',env='GORELEASER_SNAPSHOT',default='false',help='Run in snapshot mode.'"`
+	Checksum       bool              `kong:"name='checksum',env='GORELEASER_CHECKSUM',default='true',help='Create checksum.'"`
 }
 
 func main() {
