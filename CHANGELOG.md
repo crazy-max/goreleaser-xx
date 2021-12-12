@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0-r0 (2021/12/12)
+
+* GoReleaser 1.1.0 (#59)
+* Add build pre and post hooks options (#58)
+* Bump github.com/alecthomas/kong from 0.2.18 to 0.2.20 (#56)
+
 ## 1.0.0-r0 (2021/11/17)
 
 * GoReleaser 1.0.0 (#53)
