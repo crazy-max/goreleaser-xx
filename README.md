@@ -50,22 +50,24 @@ to generate a minimal `.goreleaser.yml` configuration.
 docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 ```
 
-| Flag              | Env var                   | Description   |
-|-------------------|---------------------------|---------------|
-| `--debug`         | `DEBUG`                   | Enable debug (default `false`) |
-| `--git-ref`       | `GIT_REF`                 | The branch or tag like `refs/tags/v1.0.0` (default to your working tree info) |
-| `--goreleaser`    | `GORELEASER_PATH`         | Path to GoReleaser binary (default `/opt/goreleaser-xx/goreleaser`) |
-| `--name`          | `GORELEASER_NAME`         | Project name |
-| `--dist`          | `GORELEASER_DIST`         | Dist folder where artifact will be stored |
-| `--artifact-type` | `GORELEASER_ARTIFACTTYPE` | Which type of artifact to create. Can be `archive` or `bin`. (default `archive`) |
-| `--hooks`         | `GORELEASER_HOOKS`        | [Hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
-| `--main`          | `GORELEASER_MAIN`         | Path to main.go file or main package (default `.`) |
-| `--ldflags`       | `GORELEASER_LDFLAGS`      | Custom ldflags templates |
-| `--files`         | `GORELEASER_FILES`        | Additional files/template/globs you want to add to the [archive](https://goreleaser.com/customization/archive/) |
-| `--replacements`  | `GORELEASER_REPLACEMENTS` | Replacements for `GOOS` and `GOARCH` in the archive/binary name. |
-| `--envs`          | `GORELEASER_ENVS`         | Custom environment variables to be set during the build |
-| `--snapshot`      | `GORELEASER_SNAPSHOT`     | Run in [snapshot](https://goreleaser.com/customization/snapshots/) mode |
-| `--checksum`      | `GORELEASER_CHECKSUM`     | Create checksum (default `true`) |
+| Flag                 | Env var                       | Description   |
+|----------------------|-------------------------------|---------------|
+| `--debug`            | `DEBUG`                       | Enable debug (default `false`) |
+| `--git-ref`          | `GIT_REF`                     | The branch or tag like `refs/tags/v1.0.0` (default to your working tree info) |
+| `--goreleaser`       | `GORELEASER_PATH`             | Path to GoReleaser binary (default `/opt/goreleaser-xx/goreleaser`) |
+| `--name`             | `GORELEASER_NAME`             | Project name |
+| `--dist`             | `GORELEASER_DIST`             | Dist folder where artifact will be stored |
+| `--artifact-type`    | `GORELEASER_ARTIFACTTYPE`     | Which type of artifact to create. Can be `archive` or `bin`. (default `archive`) |
+| `--hooks`            | `GORELEASER_HOOKS`            | [Global hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
+| `--main`             | `GORELEASER_MAIN`             | Path to main.go file or main package (default `.`) |
+| `--ldflags`          | `GORELEASER_LDFLAGS`          | Custom ldflags templates |
+| `--files`            | `GORELEASER_FILES`            | Additional files/template/globs you want to add to the [archive](https://goreleaser.com/customization/archive/) |
+| `--replacements`     | `GORELEASER_REPLACEMENTS`     | Replacements for `GOOS` and `GOARCH` in the archive/binary name |
+| `--envs`             | `GORELEASER_ENVS`             | Custom environment variables to be set during the build |
+| `--build-pre-hooks`  | `GORELEASER_BUILD_PRE_HOOKS`  | [Hooks](https://goreleaser.com/customization/build/#build-hooks) which will be executed before the build target |
+| `--build-post-hooks` | `GORELEASER_BUILD_POST_HOOKS` | [Hooks](https://goreleaser.com/customization/build/#build-hooks) which will be executed after the build target |
+| `--snapshot`         | `GORELEASER_SNAPSHOT`         | Run in [snapshot](https://goreleaser.com/customization/snapshots/) mode |
+| `--checksum`         | `GORELEASER_CHECKSUM`         | Create checksum (default `true`) |
 
 ## Usage
 
