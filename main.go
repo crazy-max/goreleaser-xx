@@ -41,7 +41,7 @@ type Cli struct {
 	Files          []string          `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
 	Replacements   map[string]string `kong:"name='replacements',env='GORELEASER_REPLACEMENTS',help='Replacements for GOOS and GOARCH in the archive/binary name.'"`
 	Envs           []string          `kong:"name='envs',env='GORELEASER_ENVS',help='Custom environment variables to be set during the build.'"`
-	BuildPreHooks  []string          `kong:"name='build-pre-hoosk',env='GORELEASER_BUILD_PRE_HOOKS',help='Hooks which will be executed before the build target.'"`
+	BuildPreHooks  []string          `kong:"name='build-pre-hooks',env='GORELEASER_BUILD_PRE_HOOKS',help='Hooks which will be executed before the build target.'"`
 	BuildPostHooks []string          `kong:"name='build-post-hooks',env='GORELEASER_BUILD_POST_HOOKS',help='Hooks which will be executed after the build target.'"`
 	Snapshot       bool              `kong:"name='snapshot',env='GORELEASER_SNAPSHOT',default='false',help='Run in snapshot mode.'"`
 	Checksum       bool              `kong:"name='checksum',env='GORELEASER_CHECKSUM',default='true',help='Create checksum.'"`
