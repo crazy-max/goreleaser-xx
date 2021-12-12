@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0-r1 (2021/12/12)
+
+* Fix typo `--build-pre-hoosk` (#60)
+
 ## 1.1.0-r0 (2021/12/12)
 
 * GoReleaser 1.1.0 (#59)
