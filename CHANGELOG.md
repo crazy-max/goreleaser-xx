@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0-r2 (2021/12/18)
+
+* Add flags option (#63)
+* Bump github.com/alecthomas/kong from 0.2.20 to 0.2.22 (#62)
+
 ## 1.1.0-r1 (2021/12/12)
 
 * Fix typo `--build-pre-hoosk` (#60)
