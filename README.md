@@ -60,6 +60,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--artifact-type`    | `GORELEASER_ARTIFACTTYPE`     | Which type of artifact to create. Can be `archive` or `bin`. (default `archive`) |
 | `--hooks`            | `GORELEASER_HOOKS`            | [Global hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
 | `--main`             | `GORELEASER_MAIN`             | Path to main.go file or main package (default `.`) |
+| `--flags`            | `GORELEASER_FLAGS`            | Custom flags templates |
 | `--ldflags`          | `GORELEASER_LDFLAGS`          | Custom ldflags templates |
 | `--files`            | `GORELEASER_FILES`            | Additional files/template/globs you want to add to the [archive](https://goreleaser.com/customization/archive/) |
 | `--replacements`     | `GORELEASER_REPLACEMENTS`     | Replacements for `GOOS` and `GOARCH` in the archive/binary name |
