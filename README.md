@@ -153,7 +153,12 @@ COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
 WORKDIR /src
 
-FROM base AS build
+FROM base AS vendored
+RUN --mount=type=bind,target=.,rw \
+  --mount=type=cache,target=/go/pkg/mod \
+  go mod tidy && go mod download
+
+FROM vendored AS build
 ARG TARGETPLATFORM
 RUN --mount=type=bind,source=.,target=/src,rw \
   --mount=type=cache,target=/root/.cache/go-build \
@@ -161,8 +166,6 @@ RUN --mount=type=bind,source=.,target=/src,rw \
   goreleaser-xx --debug \
     --name="myapp" \
     --dist="/out" \
-    --hooks="go mod tidy" \
-    --hooks="go mod download" \
     --ldflags="-s -w -X 'main.version={{.Version}}'" \
     --files="LICENSE" \
     --files="README.md"
@@ -170,7 +173,7 @@ RUN --mount=type=bind,source=.,target=/src,rw \
 FROM scratch AS artifact
 COPY --from=build /out /
 
-FROM alpine:3.14 AS image
+FROM alpine AS image
 RUN apk --update --no-cache add ca-certificates openssl shadow \
   && addgroup -g 1000 myapp \
   && adduser -u 1000 -G myapp -s /sbin/nologin -D myapp
