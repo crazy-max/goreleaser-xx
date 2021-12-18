@@ -37,6 +37,16 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 		})
 	}
 
+	var flags config.FlagArray
+	if len(cli.Flags) > 0 {
+		flags = append(flags, cli.Flags)
+	}
+
+	var ldflags config.StringArray
+	if len(cli.Ldflags) > 0 {
+		ldflags = append(ldflags, cli.Ldflags)
+	}
+
 	b, err := yaml.Marshal(&config.Project{
 		ProjectName: cli.Name,
 		Dist:        cli.Dist,
@@ -45,18 +55,14 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 		},
 		Builds: []config.Build{
 			{
-				Main: cli.Main,
-				Flags: []string{
-					cli.Flags,
-				},
-				Ldflags: []string{
-					cli.Ldflags,
-				},
-				Goos:   []string{target.Os},
-				Goarch: []string{target.Arch},
-				Goarm:  []string{target.Arm},
-				Gomips: []string{target.Mips},
-				Env:    append([]string{"CGO_ENABLED=0"}, cli.Envs...),
+				Main:    cli.Main,
+				Flags:   flags,
+				Ldflags: ldflags,
+				Goos:    []string{target.Os},
+				Goarch:  []string{target.Arch},
+				Goarm:   []string{target.Arm},
+				Gomips:  []string{target.Mips},
+				Env:     append([]string{"CGO_ENABLED=0"}, cli.Envs...),
 				Hooks: config.BuildHookConfig{
 					Pre:  buildPreHooks,
 					Post: buildPostHooks,
