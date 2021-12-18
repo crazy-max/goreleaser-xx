@@ -45,8 +45,10 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 		},
 		Builds: []config.Build{
 			{
-				Main:  cli.Main,
-				Flags: cli.Flags,
+				Main: cli.Main,
+				Flags: []string{
+					cli.Flags,
+				},
 				Ldflags: []string{
 					cli.Ldflags,
 				},

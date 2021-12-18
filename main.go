@@ -37,7 +37,7 @@ type Cli struct {
 	ArtifactType   string            `kong:"name='artifact-type',env='GORELEASER_ARTIFACTTYPE',enum='archive,bin',default='archive',help='Which type of artifact to create. Can be archive or bin.'"`
 	Hooks          []string          `kong:"name='hooks',env='GORELEASER_HOOKS',help='Global hooks which will be executed before the build is started.'"`
 	Main           string            `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
-	Flags          []string          `kong:"name='flags',env='GORELEASER_FLAGS',help='Custom flags templates.'"`
+	Flags          string            `kong:"name='flags',env='GORELEASER_FLAGS',help='Custom flags templates.'"`
 	Ldflags        string            `kong:"name='ldflags',env='GORELEASER_LDFLAGS',help='Custom ldflags templates.'"`
 	Files          []string          `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
 	Replacements   map[string]string `kong:"name='replacements',env='GORELEASER_REPLACEMENTS',help='Replacements for GOOS and GOARCH in the archive/binary name.'"`
