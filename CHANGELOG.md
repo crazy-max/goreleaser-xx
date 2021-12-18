@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0-r3 (2021/12/18)
+
+* Do not set flags and ldflags if empty
+* Fix flags type
+* Demo app (#64)
+
 ## 1.1.0-r2 (2021/12/18)
 
 * Add flags option (#63)
