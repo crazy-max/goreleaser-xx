@@ -17,13 +17,11 @@ RUN --mount=type=bind,target=.,rw \
 FROM vendored AS build
 ARG TARGETPLATFORM
 RUN --mount=type=bind,source=.,target=/src,rw \
-  --mount=type=cache,target=/root/.cache/go-build \
+  --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
-    --name="myapp" \
+    --name="xx-echo" \
     --dist="/out" \
-    --hooks="go mod tidy" \
-    --hooks="go mod download" \
     --main="." \
     --ldflags="-s -w -X 'main.version={{.Version}}' -X 'main.commit={{.Commit}}' -X 'main.date={{.Date}}'" \
     --files="README.md"
@@ -38,11 +36,11 @@ RUN apk --update --no-cache add \
     ca-certificates \
     libressl \
     shadow \
-  && addgroup -g 1000 myapp \
-  && adduser -u 1000 -G myapp -s /sbin/nologin -D myapp
+  && addgroup -g 1000 xx-echo \
+  && adduser -u 1000 -G xx-echo -s /sbin/nologin -D xx-echo
 
-COPY --from=build /usr/local/bin/myapp /usr/local/bin/myapp
+COPY --from=build /usr/local/bin/xx-echo /usr/local/bin/xx-echo
 
-USER myapp
+USER xx-echo
 EXPOSE 8080
-ENTRYPOINT [ "myapp" ]
+ENTRYPOINT [ "xx-echo" ]

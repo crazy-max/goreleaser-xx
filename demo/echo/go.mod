@@ -1,4 +1,4 @@
-module github.com/crazy-max/goreleaser-xx/demo/web
+module github.com/crazy-max/goreleaser-xx/demo/echo
 
 go 1.16
 

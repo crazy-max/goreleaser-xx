@@ -23,14 +23,14 @@ func main() {
 	if len(os.Args) >= 2 {
 		switch os.Args[1] {
 		case "--version", "-v":
-			fmt.Printf("myapp/%s\n", version)
+			fmt.Printf("xx-echo/%s\n", version)
 			os.Exit(0)
 		}
 	}
 
 	// Echo
 	e := echo.New()
-	e.Logger.Infof("Starting myapp/%s commit/%s date/%s go/%s %s/%s", version, commit, date, runtime.Version()[2:], runtime.GOOS, runtime.GOARCH)
+	e.Logger.Infof("Starting xx-echo/%s commit/%s date/%s go/%s %s/%s", version, commit, date, runtime.Version()[2:], runtime.GOOS, runtime.GOARCH)
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "[${time_rfc3339}] ${status} ${method} ${path} (${remote_ip}) ${latency_human}\n",
 		Output: e.Logger.Output(),

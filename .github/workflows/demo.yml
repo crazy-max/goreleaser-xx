@@ -21,7 +21,16 @@ jobs:
       fail-fast: false
       matrix:
         demo:
-          - web
+          - c
+          - cpp-hello
+          - cpp-nummer
+          - echo
+          - gorm
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     steps:
       -
         name: Checkout
@@ -32,19 +41,21 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
         with:
-          driver: docker
+          driver-opts: network=host
       -
         name: Build goreleaser-xx
         uses: docker/bake-action@v1
         with:
-          targets: image-local
+          targets: image
+          push: true
+          set: |
+            *.tags=localhost:5000/goreleaser-xx:local
       -
         name: Build demo
         uses: docker/bake-action@v1
         with:
           files: ./demo/${{ matrix.demo }}/docker-bake.hcl
-          # TODO: Build multi-platform image but needs https://github.com/moby/buildkit/pull/2521 to load local image
-          targets: image-local
+          targets: image-all
           set: |
             *.context=./demo/${{ matrix.demo }}
-            *.args.GORELEASER_XX_IMAGE=goreleaser-xx:local
+            *.args.GORELEASER_XX_IMAGE=localhost:5000/goreleaser-xx:local
