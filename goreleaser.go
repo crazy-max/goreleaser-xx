@@ -42,9 +42,24 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 		flags = append(flags, cli.Flags)
 	}
 
+	var asmflags config.StringArray
+	if len(cli.Asmflags) > 0 {
+		asmflags = append(asmflags, cli.Asmflags)
+	}
+
+	var gcflags config.StringArray
+	if len(cli.Gcflags) > 0 {
+		gcflags = append(gcflags, cli.Gcflags)
+	}
+
 	var ldflags config.StringArray
 	if len(cli.Ldflags) > 0 {
 		ldflags = append(ldflags, cli.Ldflags)
+	}
+
+	var tags config.FlagArray
+	if len(cli.Tags) > 0 {
+		tags = append(tags, cli.Tags)
 	}
 
 	b, err := yaml.Marshal(&config.Project{
@@ -57,7 +72,10 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 			{
 				Main:     cli.Main,
 				Flags:    flags,
+				Asmflags: asmflags,
+				Gcflags:  gcflags,
 				Ldflags:  ldflags,
+				Tags:     tags,
 				Goos:     []string{target.Os},
 				Goarch:   []string{target.Arch},
 				Goarm:    []string{target.Arm},
