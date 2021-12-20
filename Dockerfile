@@ -36,8 +36,8 @@ ARG TARGETPLATFORM
 RUN --mount=type=bind,target=/src,rw \
   --mount=target=/go/pkg/mod,type=cache \
   case "$GIT_REF" in \
-    refs/tags/v*) gitTag="${GIT_REF#refs/tags/v}" ;; \
-    *) gitTag="0.0.0" ;; \
+    refs/tags/v*) gitTag="${GIT_REF#refs/tags}" ;; \
+    *) gitTag=$(git describe --match 'v[0-9]*' --dirty='.m' --always --tags) ;; \
   esac \
   && xx-go build -v -ldflags "-w -s -X 'main.version=${gitTag}'" -o /usr/local/bin/goreleaser-xx \
   && goreleaser-xx --help \
