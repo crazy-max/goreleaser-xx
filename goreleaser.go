@@ -55,14 +55,15 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 		},
 		Builds: []config.Build{
 			{
-				Main:    cli.Main,
-				Flags:   flags,
-				Ldflags: ldflags,
-				Goos:    []string{target.Os},
-				Goarch:  []string{target.Arch},
-				Goarm:   []string{target.Arm},
-				Gomips:  []string{target.Mips},
-				Env:     append([]string{"CGO_ENABLED=0"}, cli.Envs...),
+				Main:     cli.Main,
+				Flags:    flags,
+				Ldflags:  ldflags,
+				Goos:     []string{target.Os},
+				Goarch:   []string{target.Arch},
+				Goarm:    []string{target.Arm},
+				Gomips:   []string{target.Mips},
+				Env:      append([]string{"CGO_ENABLED=0"}, cli.Envs...),
+				GoBinary: cli.GoBinary,
 				Hooks: config.BuildHookConfig{
 					Pre:  buildPreHooks,
 					Post: buildPostHooks,
