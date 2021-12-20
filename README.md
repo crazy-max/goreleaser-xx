@@ -23,6 +23,7 @@ ___
 * [Usage](#usage)
   * [Minimal](#minimal)
   * [Multi-platform image](#multi-platform-image)
+  * [CGo](#cgo)
 * [Build](#build)
 * [Contributing](#contributing)
 * [License](#license)
@@ -33,6 +34,7 @@ ___
 * Build into any architecture
 * Translation of [platform ARGs in the global scope](https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope) into Go compiler's target
 * Auto generation of `.goreleaser.yml` config based on target architecture
+* [Demo projects](demo)
 
 ## Image
 
@@ -203,6 +205,60 @@ docker buildx build \
 ```
 > `windows/amd64` and `darwin/amd64` platforms have been removed here
 > because `alpine:3.14` does not support them.
+
+### CGo
+
+If you need to use CGo to build your project, you can use `goreleaser-xx` with
+[`tonistiigi/xx`](https://github.com/tonistiigi/xx):
+
+```dockerfile
+# syntax=docker/dockerfile:1.3-labs
+
+FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.0 AS xx
+FROM --platform=$BUILDPLATFORM golang:alpine AS base
+COPY --from=goreleaser-xx / /
+COPY --from=xx / /
+RUN apk add --no-cache \
+    clang \
+    git \
+    file \
+    lld \
+    llvm \
+    pkgconfig
+WORKDIR /src
+
+FROM base AS vendored
+RUN --mount=type=bind,target=.,rw \
+  --mount=type=cache,target=/go/pkg/mod \
+  go mod tidy && go mod download
+
+FROM vendored AS build
+ARG TARGETPLATFORM
+RUN xx-apk add --no-cache \
+    gcc \
+    musl-dev
+# XX_CC_PREFER_STATIC_LINKER prefers ld to lld in ppc64le and 386.
+ENV XX_CC_PREFER_STATIC_LINKER=1
+RUN --mount=type=bind,source=.,target=/src,rw \
+  --mount=type=cache,target=/root/.cache \
+  --mount=type=cache,target=/go/pkg/mod \
+  goreleaser-xx --debug \
+    --go-binary="xx-go" \
+    --name="myapp" \
+    --dist="/out" \
+    --ldflags="-s -w -X 'main.version={{.Version}}'" \
+    --envs="CGO_ENABLED=1" \
+    --files="LICENSE" \
+    --files="README.md"
+
+FROM scratch AS artifact
+COPY --from=build /out /
+
+FROM scratch
+COPY --from=build /usr/local/bin/myapp /myapp
+ENTRYPOINT [ "/myapp" ]
+```
 
 ## Build
 
