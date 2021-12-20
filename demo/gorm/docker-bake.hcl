@@ -6,7 +6,7 @@ target "image" {}
 
 target "image-local" {
   inherits = ["image"]
-  tags = ["myapp:local"]
+  tags = ["xx-gorm:local"]
   output = ["type=docker"]
 }
 
@@ -17,8 +17,9 @@ target "image-all" {
     "linux/arm/v6",
     "linux/arm/v7",
     "linux/arm64",
-    "linux/386",
-    "linux/ppc64le"
+    "linux/ppc64le",
+    "linux/riscv64",
+    "linux/s390x"
   ]
 }
 
@@ -31,16 +32,11 @@ target "artifact-all" {
   inherits = ["artifact"]
   platforms = [
     "linux/amd64",
-    "linux/arm/v5",
     "linux/arm/v6",
     "linux/arm/v7",
     "linux/arm64",
-    "linux/386",
     "linux/ppc64le",
-    "windows/amd64",
-    "windows/386",
-    "darwin/amd64",
-    "freebsd/amd64",
-    "freebsd/386"
+    "linux/riscv64",
+    "linux/s390x"
   ]
 }
