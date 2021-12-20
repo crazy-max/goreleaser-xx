@@ -55,6 +55,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--debug`            | `DEBUG`                       | Enable debug (default `false`) |
 | `--git-ref`          | `GIT_REF`                     | The branch or tag like `refs/tags/v1.0.0` (default to your working tree info) |
 | `--goreleaser`       | `GORELEASER_PATH`             | Path to GoReleaser binary (default `/opt/goreleaser-xx/goreleaser`) |
+| `--go-binary`        | `GORELEASER_GOBINARY`         | Set a specific go binary to use when building (default `go`) |
 | `--name`             | `GORELEASER_NAME`             | Project name |
 | `--dist`             | `GORELEASER_DIST`             | Dist folder where artifact will be stored |
 | `--artifact-type`    | `GORELEASER_ARTIFACTTYPE`     | Which type of artifact to create. Can be `archive` or `bin`. (default `archive`) |
@@ -90,7 +91,7 @@ WORKDIR /src
 FROM base AS build
 ARG TARGETPLATFORM
 RUN --mount=type=bind,source=.,target=/src,rw \
-  --mount=type=cache,target=/root/.cache/go-build \
+  --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
     --name="myapp" \
@@ -161,7 +162,7 @@ RUN --mount=type=bind,target=.,rw \
 FROM vendored AS build
 ARG TARGETPLATFORM
 RUN --mount=type=bind,source=.,target=/src,rw \
-  --mount=type=cache,target=/root/.cache/go-build \
+  --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
     --name="myapp" \

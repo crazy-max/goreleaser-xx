@@ -32,6 +32,7 @@ type Cli struct {
 	Debug          bool              `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
 	GitRef         string            `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
 	GoReleaser     string            `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
+	GoBinary       string            `kong:"name='go-binary',env='GORELEASER_GOBINARY',help='Set a specific go binary to use when building.'"`
 	Name           string            `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
 	Dist           string            `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
 	ArtifactType   string            `kong:"name='artifact-type',env='GORELEASER_ARTIFACTTYPE',enum='archive,bin',default='archive',help='Which type of artifact to create. Can be archive or bin.'"`
