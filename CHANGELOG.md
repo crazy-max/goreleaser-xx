@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0-r5 (2021/12/21)
+
+* Allow list of artifact types (#70 #72)
+* `--artifact-type` deprecated. Use `--artifacts` instead (#72)
+* `--hooks` deprecated. Use `--pre-hooks` instead (#73)
+* `--build-pre-hooks` deprecated. Use `--pre-hooks` instead (#73)
+* `--build-post-hooks` deprecated. Use `--post-hooks` instead (#73)
+
 ## 1.1.0-r4 (2021/12/20)
 
 * Fix artifact version (#68)
