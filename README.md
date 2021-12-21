@@ -71,7 +71,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--go-binary`        | `GORELEASER_GOBINARY`         | Set a specific go binary to use when building (default `go`) |
 | `--name`             | `GORELEASER_NAME`             | Project name |
 | `--dist`             | `GORELEASER_DIST`             | Dist folder where artifact will be stored |
-| `--artifact-type`    | `GORELEASER_ARTIFACTTYPE`     | Which type of artifact to create (`archive`, `bin` or `all`) (default `archive`) |
+| `--artifacts`        | `GORELEASER_ARTIFACTS`        | Types of artifact to create (`archive`, `bin`) (default `archive`) |
 | `--hooks`            | `GORELEASER_HOOKS`            | [Global hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
 | `--main`             | `GORELEASER_MAIN`             | Path to main.go file or main package (default `.`) |
 | `--flags`            | `GORELEASER_FLAGS`            | Custom flags templates |

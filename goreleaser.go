@@ -11,7 +11,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func getGRConfig(cli Cli, target Target) (string, error) {
+func getGRConfig(cli Cli, target Target) (string, string, error) {
+	dist, err := os.MkdirTemp(os.TempDir(), "dist")
+	if err != nil {
+		return "", "", err
+	}
+
 	var arFiles []config.File
 	for _, f := range cli.Files {
 		arFiles = append(arFiles, config.File{
@@ -64,7 +69,7 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 
 	b, err := yaml.Marshal(&config.Project{
 		ProjectName: cli.Name,
-		Dist:        cli.Dist,
+		Dist:        dist,
 		Before: config.Before{
 			Hooks: cli.Hooks,
 		},
@@ -111,16 +116,16 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 		},
 	})
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	file, err := ioutil.TempFile(os.TempDir(), ".goreleaser.yml")
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if err := ioutil.WriteFile(file.Name(), b, 0644); err != nil {
-		os.Remove(file.Name())
-		return "", err
+		_ = os.Remove(file.Name())
+		return "", "", err
 	}
 
 	if cli.Debug {
@@ -131,5 +136,5 @@ func getGRConfig(cli Cli, target Target) (string, error) {
 		}
 	}
 
-	return file.Name(), nil
+	return file.Name(), dist, nil
 }

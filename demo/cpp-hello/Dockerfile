@@ -34,6 +34,7 @@ RUN --mount=type=bind,source=.,rw \
     --go-binary="xx-go" \
     --name="xx-cpp-hello" \
     --dist="/out" \
+    --artifacts="bin" \
     --main="." \
     --ldflags="-s -w -extldflags -static" \
     --envs="GO111MODULE=auto" \
