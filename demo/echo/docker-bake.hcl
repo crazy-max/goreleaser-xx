@@ -1,12 +1,24 @@
+variable "GORELEASER_XX_BASE" {
+  default = "crazymax/goreleaser-xx:edge"
+}
+
+target "_commons" {
+  args = {
+    GORELEASER_XX_BASE = GORELEASER_XX_BASE
+  }
+}
+
 group "default" {
   targets = ["image-local"]
 }
 
-target "image" {}
+target "image" {
+  inherits = ["_commons"]
+  tags = ["xx-echo:local"]
+}
 
 target "image-local" {
   inherits = ["image"]
-  tags = ["xx-echo:local"]
   output = ["type=docker"]
 }
 
@@ -23,6 +35,7 @@ target "image-all" {
 }
 
 target "artifact" {
+  inherits = ["_commons"]
   target = "artifact"
   output = ["./dist"]
 }

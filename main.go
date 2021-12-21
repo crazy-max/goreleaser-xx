@@ -35,7 +35,7 @@ type Cli struct {
 	GoBinary       string            `kong:"name='go-binary',env='GORELEASER_GOBINARY',help='Set a specific go binary to use when building.'"`
 	Name           string            `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
 	Dist           string            `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
-	ArtifactType   string            `kong:"name='artifact-type',env='GORELEASER_ARTIFACTTYPE',enum='archive,bin',default='archive',help='Which type of artifact to create. Can be archive or bin.'"`
+	ArtifactType   string            `kong:"name='artifact-type',env='GORELEASER_ARTIFACTTYPE',enum='archive,bin,all',default='archive',help='Which type of artifact to create.'"`
 	Hooks          []string          `kong:"name='hooks',env='GORELEASER_HOOKS',help='Global hooks which will be executed before the build is started.'"`
 	Main           string            `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
 	Flags          string            `kong:"name='flags',env='GORELEASER_FLAGS',help='Custom flags templates.'"`
@@ -142,48 +142,51 @@ func main() {
 		log.Printf("WARN: cannot open dist folder: %v", err)
 	}
 	defer distFolder.Close()
-	names, err := distFolder.Readdir(-1)
+	fis, err := distFolder.Readdir(-1)
 	if err != nil {
 		log.Printf("WARN: cannot read dist folder: %v", err)
 	}
-	for _, name := range names {
-		if name.IsDir() {
-			if err := os.RemoveAll(path.Join(cli.Dist, name.Name())); err != nil {
+	for _, fi := range fis {
+		if fi.IsDir() {
+			if err := os.RemoveAll(path.Join(cli.Dist, fi.Name())); err != nil {
 				log.Printf("WARN: cannot remove: %v", err)
 			}
 			continue
 		}
-		if strings.HasPrefix(name.Name(), "config") {
-			if err := os.Remove(path.Join(cli.Dist, name.Name())); err != nil {
+		if strings.HasPrefix(fi.Name(), "config") {
+			if err := os.Remove(path.Join(cli.Dist, fi.Name())); err != nil {
 				log.Printf("WARN: cannot remove: %v", err)
 			}
 			continue
 		}
-		if cli.ArtifactType == "bin" {
-			binName := binaryName(name)
+		if cli.ArtifactType == "all" || cli.ArtifactType == "bin" {
+			binName := binaryName(fi)
 			if err := copyFile(path.Join("/usr/local/bin", cli.Name), path.Join(cli.Dist, binName)); err != nil {
 				log.Fatalf("ERR: cannot copy binary: %v", err)
-			}
-			if err := os.Remove(path.Join(cli.Dist, name.Name())); err != nil {
-				log.Fatalf("ERR: cannot remove: %v", err)
 			}
 			if cli.Checksum {
 				checksum(path.Join(cli.Dist, binName))
 			}
-		} else if cli.ArtifactType == "archive" {
+		}
+		if cli.ArtifactType == "all" || cli.ArtifactType == "archive" {
 			if cli.Checksum {
-				checksum(path.Join(cli.Dist, name.Name()))
+				checksum(path.Join(cli.Dist, fi.Name()))
+			}
+		}
+		if cli.ArtifactType == "bin" {
+			if err := os.Remove(path.Join(cli.Dist, fi.Name())); err != nil {
+				log.Fatalf("ERR: cannot remove: %v", err)
 			}
 		}
 	}
 }
 
-func binaryName(archive fs.FileInfo) string {
-	archiveExt := filepath.Ext(archive.Name())
+func binaryName(fi fs.FileInfo) string {
+	archiveExt := filepath.Ext(fi.Name())
 	if archiveExt != ".zip" {
 		archiveExt = ".tar.gz"
 	}
-	return strings.TrimSuffix(archive.Name(), archiveExt)
+	return strings.TrimSuffix(fi.Name(), archiveExt)
 }
 
 func copyFile(src string, dest string) error {

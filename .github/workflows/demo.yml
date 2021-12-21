@@ -55,7 +55,12 @@ jobs:
         uses: docker/bake-action@v1
         with:
           files: ./demo/${{ matrix.demo }}/docker-bake.hcl
-          targets: image-all
+          targets: artifact-all
           set: |
             *.context=./demo/${{ matrix.demo }}
-            *.args.GORELEASER_XX_IMAGE=localhost:5000/goreleaser-xx:local
+        env:
+          GORELEASER_XX_BASE: localhost:5000/goreleaser-xx:local
+      -
+        name: List artifacts
+        run: |
+          tree -nh ./dist
