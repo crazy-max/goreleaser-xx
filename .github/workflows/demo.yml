@@ -26,6 +26,7 @@ jobs:
           - cpp-nummer
           - echo
           - gorm
+          - hello
     services:
       registry:
         image: registry:2

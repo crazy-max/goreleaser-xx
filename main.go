@@ -28,28 +28,33 @@ var (
 
 // Cli holds command line args, flags and cmds
 type Cli struct {
-	Version        kong.VersionFlag
-	Debug          bool              `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
-	GitRef         string            `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
-	GoReleaser     string            `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
-	GoBinary       string            `kong:"name='go-binary',env='GORELEASER_GOBINARY',help='Set a specific go binary to use when building.'"`
-	Name           string            `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
-	Dist           string            `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
-	Artifacts      []string          `kong:"name='artifacts',env='GORELEASER_ARTIFACTS',enum='archive,bin',default='archive',help='Types of artifact to create.'"`
-	Hooks          []string          `kong:"name='hooks',env='GORELEASER_HOOKS',help='Global hooks which will be executed before the build is started.'"`
-	Main           string            `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
-	Flags          string            `kong:"name='flags',env='GORELEASER_FLAGS',help='Custom flags templates.'"`
-	Asmflags       string            `kong:"name='asmflags',env='GORELEASER_ASMFLAGS',help='Custom asmflags templates.'"`
-	Gcflags        string            `kong:"name='gcflags',env='GORELEASER_GCFLAGS',help='Custom gcflags templates.'"`
-	Ldflags        string            `kong:"name='ldflags',env='GORELEASER_LDFLAGS',help='Custom ldflags templates.'"`
-	Tags           string            `kong:"name='tags',env='GORELEASER_TAGS',help='Custom build tags templates.'"`
-	Files          []string          `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
-	Replacements   map[string]string `kong:"name='replacements',env='GORELEASER_REPLACEMENTS',help='Replacements for GOOS and GOARCH in the archive/binary name.'"`
-	Envs           []string          `kong:"name='envs',env='GORELEASER_ENVS',help='Custom environment variables to be set during the build.'"`
-	BuildPreHooks  []string          `kong:"name='build-pre-hooks',env='GORELEASER_BUILD_PRE_HOOKS',help='Hooks which will be executed before the build target.'"`
-	BuildPostHooks []string          `kong:"name='build-post-hooks',env='GORELEASER_BUILD_POST_HOOKS',help='Hooks which will be executed after the build target.'"`
-	Snapshot       bool              `kong:"name='snapshot',env='GORELEASER_SNAPSHOT',default='false',help='Run in snapshot mode.'"`
-	Checksum       bool              `kong:"name='checksum',env='GORELEASER_CHECKSUM',default='true',help='Create checksum.'"`
+	Version      kong.VersionFlag
+	Debug        bool              `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
+	GitRef       string            `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
+	GoReleaser   string            `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
+	GoBinary     string            `kong:"name='go-binary',env='GORELEASER_GOBINARY',help='Set a specific go binary to use when building.'"`
+	Name         string            `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
+	Dist         string            `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
+	Artifacts    []string          `kong:"name='artifacts',env='GORELEASER_ARTIFACTS',enum='archive,bin',default='archive',help='Types of artifact to create.'"`
+	Main         string            `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
+	Flags        string            `kong:"name='flags',env='GORELEASER_FLAGS',help='Custom flags templates.'"`
+	Asmflags     string            `kong:"name='asmflags',env='GORELEASER_ASMFLAGS',help='Custom asmflags templates.'"`
+	Gcflags      string            `kong:"name='gcflags',env='GORELEASER_GCFLAGS',help='Custom gcflags templates.'"`
+	Ldflags      string            `kong:"name='ldflags',env='GORELEASER_LDFLAGS',help='Custom ldflags templates.'"`
+	Tags         string            `kong:"name='tags',env='GORELEASER_TAGS',help='Custom build tags templates.'"`
+	Files        []string          `kong:"name='files',env='GORELEASER_FILES',help='Additional files/template/globs you want to add to the archive.'"`
+	Replacements map[string]string `kong:"name='replacements',env='GORELEASER_REPLACEMENTS',help='Replacements for GOOS and GOARCH in the archive/binary name.'"`
+	Envs         []string          `kong:"name='envs',env='GORELEASER_ENVS',help='Custom environment variables to be set during the build.'"`
+	PreHooks     []string          `kong:"name='pre-hooks',env='GORELEASER_PRE_HOOKS',help='Hooks which will be executed before the build.'"`
+	PostHooks    []string          `kong:"name='post-hooks',env='GORELEASER_POST_HOOKS',help='Hooks which will be executed after the build.'"`
+	Snapshot     bool              `kong:"name='snapshot',env='GORELEASER_SNAPSHOT',default='false',help='Run in snapshot mode.'"`
+	Checksum     bool              `kong:"name='checksum',env='GORELEASER_CHECKSUM',default='true',help='Create checksum.'"`
+
+	// Deprecated flags
+	ArtifactType   string   `kong:"hidden,name='artifact-type',env='GORELEASER_ARTIFACTTYPE',help='artifacts'"`
+	Hooks          []string `kong:"hidden,name='hooks',env='GORELEASER_HOOKS',help='pre-hooks'"`
+	BuildPreHooks  []string `kong:"hidden,name='build-pre-hooks',env='GORELEASER_BUILD_PRE_HOOKS',help='pre-hooks'"`
+	BuildPostHooks []string `kong:"hidden,name='build-post-hooks',env='GORELEASER_BUILD_POST_HOOKS',help='post-hooks'"`
 }
 
 func main() {
@@ -57,7 +62,7 @@ func main() {
 	var grFlags []string
 
 	// Parse command line
-	_ = kong.Parse(&cli,
+	ctx := kong.Parse(&cli,
 		kong.Name(name),
 		kong.Description(fmt.Sprintf("%s. More info: %s", desc, url)),
 		kong.UsageOnError(),
@@ -86,6 +91,30 @@ func main() {
 		log.Println("DBG: environment:")
 		for _, e := range os.Environ() {
 			log.Printf("  %s", e)
+		}
+	}
+
+	// Warn on deprecated flag usage and assign to new flag
+	for _, f := range ctx.Flags() {
+		if f.Hidden && f.Set {
+			for _, fa := range ctx.Flags() {
+				if fa.Name != f.Help {
+					continue
+				}
+				if fa.Set {
+					continue
+				}
+				switch f.Name {
+				case "artifact-type":
+					cli.Artifacts = []string{f.Target.String()}
+				case "hooks", "build-pre-hooks":
+					cli.PreHooks = f.Target.Interface().([]string)
+				case "build-post-hooks":
+					cli.PostHooks = f.Target.Interface().([]string)
+				}
+				break
+			}
+			log.Printf("WARN: --%s is deprecated and will be removed in a future release. Use --%s instead.", f.Name, f.Help)
 		}
 	}
 

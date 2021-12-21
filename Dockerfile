@@ -53,21 +53,22 @@ RUN apk --no-cache add git
 WORKDIR /src
 ARG GIT_REF
 RUN git clone --branch v2.7.0 https://github.com/crazy-max/ddns-route53 .
+RUN --mount=type=cache,target=/go/pkg/mod \
+  go mod tidy && go mod download
 COPY --from=release / /
 ARG TARGETPLATFORM
-RUN goreleaser-xx --debug \
+RUN --mount=type=cache,target=/root/.cache \
+  --mount=type=cache,target=/go/pkg/mod \
+  goreleaser-xx --debug \
     --name="ddns-route53" \
     --dist="/dist" \
-    --hooks="go mod tidy" \
-    --hooks="go mod download" \
     --main="./cmd/main.go" \
     --ldflags="-s -w -X 'main.version={{.Version}}'" \
     --files="CHANGELOG.md" \
     --files="LICENSE" \
     --files="README.md" \
     --replacements="386=i386" \
-    --replacements="amd64=x86_64" \
-  && ls -al /dist/
+    --replacements="amd64=x86_64"
 
 FROM scratch AS test-artifact
 COPY --from=test /dist /

@@ -25,7 +25,7 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 	}
 
 	var buildPreHooks []config.Hook
-	for _, cmd := range cli.BuildPreHooks {
+	for _, cmd := range cli.PreHooks {
 		buildPreHooks = append(buildPreHooks, config.Hook{
 			Cmd: cmd,
 		})
@@ -36,7 +36,7 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 			Cmd: `cp "{{ .Path }}" /usr/local/bin/{{ .ProjectName }}`,
 		},
 	}
-	for _, cmd := range cli.BuildPostHooks {
+	for _, cmd := range cli.PostHooks {
 		buildPostHooks = append(buildPostHooks, config.Hook{
 			Cmd: cmd,
 		})
@@ -70,9 +70,6 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 	b, err := yaml.Marshal(&config.Project{
 		ProjectName: cli.Name,
 		Dist:        dist,
-		Before: config.Before{
-			Hooks: cli.Hooks,
-		},
 		Builds: []config.Build{
 			{
 				Main:     cli.Main,
