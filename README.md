@@ -18,6 +18,7 @@ to ease the integration and cross compilation in a Dockerfile for your Go projec
 ___
 
 * [Features](#features)
+* [Projects using goreleaser-xx](#projects-using-goreleaser-xx)
 * [Image](#image)
 * [CLI](#cli)
 * [Usage](#usage)
@@ -35,6 +36,16 @@ ___
 * Translation of [platform ARGs in the global scope](https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope) into Go compiler's target
 * Auto generation of `.goreleaser.yml` config based on target architecture
 * [Demo projects](demo)
+
+## Projects using goreleaser-xx
+
+* [ddns-route53](https://github.com/crazy-max/ddns-route53)
+* [Discord bot](https://github.com/blueprintue/discord-bot)
+* [Diun](https://github.com/crazy-max/diun)
+* [FTPGrab](https://github.com/crazy-max/ftpgrab)
+* [swarm-cronjob](https://github.com/crazy-max/swarm-cronjob)
+* [yasu](https://github.com/crazy-max/yasu)
+* [Zipper](https://github.com/pratikbalar/zipper)
 
 ## Image
 
@@ -60,7 +71,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--go-binary`        | `GORELEASER_GOBINARY`         | Set a specific go binary to use when building (default `go`) |
 | `--name`             | `GORELEASER_NAME`             | Project name |
 | `--dist`             | `GORELEASER_DIST`             | Dist folder where artifact will be stored |
-| `--artifact-type`    | `GORELEASER_ARTIFACTTYPE`     | Which type of artifact to create. Can be `archive` or `bin`. (default `archive`) |
+| `--artifact-type`    | `GORELEASER_ARTIFACTTYPE`     | Which type of artifact to create (`archive`, `bin` or `all`) (default `archive`) |
 | `--hooks`            | `GORELEASER_HOOKS`            | [Global hooks](https://goreleaser.com/customization/hooks/) which will be executed before the build is started |
 | `--main`             | `GORELEASER_MAIN`             | Path to main.go file or main package (default `.`) |
 | `--flags`            | `GORELEASER_FLAGS`            | Custom flags templates |
@@ -93,7 +104,12 @@ COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
 WORKDIR /src
 
-FROM base AS build
+FROM base AS vendored
+RUN --mount=type=bind,target=.,rw \
+  --mount=type=cache,target=/go/pkg/mod \
+  go mod tidy && go mod download
+
+FROM vendored AS build
 ARG TARGETPLATFORM
 RUN --mount=type=bind,source=.,target=/src,rw \
   --mount=type=cache,target=/root/.cache \
@@ -101,8 +117,6 @@ RUN --mount=type=bind,source=.,target=/src,rw \
   goreleaser-xx --debug \
     --name="myapp" \
     --dist="/out" \
-    --hooks="go mod tidy" \
-    --hooks="go mod download" \
     --ldflags="-s -w -X 'main.version={{.Version}}'" \
     --files="LICENSE" \
     --files="README.md" \

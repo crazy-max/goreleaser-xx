@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1.3-labs
 
 ARG GO_VERSION=1.17
-ARG GORELEASER_XX_IMAGE=crazymax/goreleaser-xx:edge
+ARG GORELEASER_XX_BASE=crazymax/goreleaser-xx:edge
 ARG XX_VERSION=1.1.0
 
-FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_IMAGE} AS goreleaser-xx
+FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_BASE} AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
@@ -33,6 +33,7 @@ RUN --mount=type=bind,source=.,rw \
     --go-binary="xx-go" \
     --name="xx-c" \
     --dist="/out" \
+    --artifact-type="all" \
     --main="." \
     --ldflags="-s -w -linkmode external -extldflags -static" \
     --envs="GO111MODULE=auto" \
@@ -40,8 +41,7 @@ RUN --mount=type=bind,source=.,rw \
     --files="README.md"
 
 FROM scratch AS artifact
-COPY --from=build /out/*.tar.gz /
-COPY --from=build /out/*.zip /
+COPY --from=build /out /
 
 FROM scratch
 COPY --from=build /usr/local/bin/xx-c /xx-c

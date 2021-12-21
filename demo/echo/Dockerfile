@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1.2
 
 ARG GO_VERSION=1.17
-ARG GORELEASER_XX_IMAGE=crazymax/goreleaser-xx:edge
+ARG GORELEASER_XX_BASE=crazymax/goreleaser-xx:edge
 
-FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_IMAGE} AS goreleaser-xx
+FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_BASE} AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
 COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
@@ -27,8 +27,7 @@ RUN --mount=type=bind,source=.,target=/src,rw \
     --files="README.md"
 
 FROM scratch AS artifact
-COPY --from=build /out/*.tar.gz /
-COPY --from=build /out/*.zip /
+COPY --from=build /out /
 
 FROM alpine
 
