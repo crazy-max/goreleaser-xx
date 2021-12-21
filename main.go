@@ -35,7 +35,7 @@ type Cli struct {
 	GoBinary       string            `kong:"name='go-binary',env='GORELEASER_GOBINARY',help='Set a specific go binary to use when building.'"`
 	Name           string            `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
 	Dist           string            `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
-	ArtifactType   string            `kong:"name='artifact-type',env='GORELEASER_ARTIFACTTYPE',enum='archive,bin,all',default='archive',help='Which type of artifact to create.'"`
+	Artifacts      []string          `kong:"name='artifacts',env='GORELEASER_ARTIFACTS',enum='archive,bin',default='archive',help='Types of artifact to create.'"`
 	Hooks          []string          `kong:"name='hooks',env='GORELEASER_HOOKS',help='Global hooks which will be executed before the build is started.'"`
 	Main           string            `kong:"name='main',env='GORELEASER_MAIN',default='.',help='Path to main.go file or main package.'"`
 	Flags          string            `kong:"name='flags',env='GORELEASER_FLAGS',help='Custom flags templates.'"`
@@ -96,11 +96,14 @@ func main() {
 	}
 
 	// GoReleaser config
-	grConfig, err := getGRConfig(cli, target)
+	grConfig, grDist, err := getGRConfig(cli, target)
 	if err != nil {
 		log.Fatalf("ERR: %v", err)
 	}
-	defer os.Remove(grConfig)
+	defer func() {
+		_ = os.Remove(grConfig)
+		_ = os.RemoveAll(grDist)
+	}()
 	grFlags = append(grFlags, "release", "--config", grConfig)
 
 	// Git tag
@@ -136,46 +139,45 @@ func main() {
 		log.Fatalf("ERR: goreleaser failed: %v", err)
 	}
 
+	// Create dist folder
+	if err := os.Mkdir(cli.Dist, 0755); err != nil {
+		log.Fatal(err)
+	}
+
 	// Post build
-	distFolder, err := os.Open(cli.Dist)
+	fdist, err := os.Open(grDist)
 	if err != nil {
 		log.Printf("WARN: cannot open dist folder: %v", err)
 	}
-	defer distFolder.Close()
-	fis, err := distFolder.Readdir(-1)
+	defer fdist.Close()
+	fis, err := fdist.Readdir(-1)
 	if err != nil {
 		log.Printf("WARN: cannot read dist folder: %v", err)
 	}
 	for _, fi := range fis {
-		if fi.IsDir() {
-			if err := os.RemoveAll(path.Join(cli.Dist, fi.Name())); err != nil {
-				log.Printf("WARN: cannot remove: %v", err)
-			}
+		if fi.IsDir() || strings.HasPrefix(fi.Name(), "config") {
 			continue
 		}
-		if strings.HasPrefix(fi.Name(), "config") {
-			if err := os.Remove(path.Join(cli.Dist, fi.Name())); err != nil {
-				log.Printf("WARN: cannot remove: %v", err)
-			}
-			continue
-		}
-		if cli.ArtifactType == "all" || cli.ArtifactType == "bin" {
-			binName := binaryName(fi)
-			if err := copyFile(path.Join("/usr/local/bin", cli.Name), path.Join(cli.Dist, binName)); err != nil {
-				log.Fatalf("ERR: cannot copy binary: %v", err)
+		for _, atf := range cli.Artifacts {
+			var atfPath string
+			switch atf {
+			case "bin":
+				atfPath = path.Join(cli.Dist, binaryName(fi))
+				if err := copyFile(path.Join("/usr/local/bin", cli.Name), atfPath); err != nil {
+					log.Fatalf("ERR: cannot copy binary: %v", err)
+				}
+				log.Printf("INF: binary created: %s", atfPath)
+			case "archive":
+				atfPath = path.Join(cli.Dist, fi.Name())
+				if err := copyFile(path.Join(fdist.Name(), fi.Name()), atfPath); err != nil {
+					log.Fatalf("ERR: cannot copy archive: %v", err)
+				}
+				log.Printf("INF: archive created: %s", atfPath)
+			default:
+				log.Fatalf("ERR: unknown artifact type: %s", atf)
 			}
 			if cli.Checksum {
-				checksum(path.Join(cli.Dist, binName))
-			}
-		}
-		if cli.ArtifactType == "all" || cli.ArtifactType == "archive" {
-			if cli.Checksum {
-				checksum(path.Join(cli.Dist, fi.Name()))
-			}
-		}
-		if cli.ArtifactType == "bin" {
-			if err := os.Remove(path.Join(cli.Dist, fi.Name())); err != nil {
-				log.Fatalf("ERR: cannot remove: %v", err)
+				checksum(atfPath)
 			}
 		}
 	}
@@ -240,5 +242,5 @@ func checksum(filename string) {
 		log.Fatalf("ERR: failed to write file: %v", err)
 	}
 
-	log.Printf("INF: checksum file created in %s", checksumFile)
+	log.Printf("INF: checksum file created: %s", checksumFile)
 }

@@ -33,7 +33,8 @@ RUN --mount=type=bind,source=.,rw \
     --go-binary="xx-go" \
     --name="xx-c" \
     --dist="/out" \
-    --artifact-type="all" \
+    --artifacts="archive" \
+    --artifacts="bin" \
     --main="." \
     --ldflags="-s -w -linkmode external -extldflags -static" \
     --envs="GO111MODULE=auto" \
