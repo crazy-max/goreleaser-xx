@@ -5,123 +5,186 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/goreleaser/goreleaser/pkg/config"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
 
 func getGRConfig(cli Cli, target Target) (string, string, error) {
-	dist, err := os.MkdirTemp(os.TempDir(), "dist")
+	var cfg config.Project
+	var err error
+
+	if len(cli.Config) > 0 {
+		b, err := os.ReadFile(cli.Config)
+		if err != nil {
+			return "", "", err
+		}
+		if err := yaml.Unmarshal(b, &cfg); err != nil {
+			return "", "", err
+		}
+	}
+
+	cfg.Dist, err = os.MkdirTemp(os.TempDir(), "dist")
 	if err != nil {
 		return "", "", err
 	}
 
-	var arFiles []config.File
+	var build config.Build
+	if len(cfg.Builds) == 1 {
+		build = cfg.Builds[0]
+	} else if len(cfg.Builds) > 1 {
+		return "", "", errors.New("multiple builds found, please specify one")
+	}
+
+	if len(build.Goos) > 0 {
+		log.Printf("WARN: goos specified in your config file is overriden")
+	}
+	if len(build.Goarch) > 0 {
+		log.Printf("WARN: goarch specified in your config file is overriden")
+	}
+	if len(build.Goarm) > 0 {
+		log.Printf("WARN: goarm specified in your config file is overriden")
+	}
+	if len(build.Gomips) > 0 {
+		log.Printf("WARN: gomips specified in your config file is overriden")
+	}
+	build.Goos = []string{target.Os}
+	build.Goarch = []string{target.Arch}
+	build.Goarm = []string{target.Arm}
+	build.Gomips = []string{target.Mips}
+
+	if len(cli.Name) > 0 {
+		cfg.ProjectName = cli.Name
+	}
+	if len(cli.Envs) > 0 {
+		cgoEnabledSet := false
+		for _, e := range cli.Envs {
+			if strings.HasPrefix(e, "CGO_ENABLED=") {
+				cgoEnabledSet = true
+				break
+			}
+		}
+		if !cgoEnabledSet {
+			cfg.Env = append(cfg.Env, "CGO_ENABLED=0")
+		}
+		cfg.Env = append(cfg.Env, cli.Envs...)
+	}
+	if len(cli.Main) > 0 {
+		build.Main = cli.Main
+	}
+	if len(cli.Flags) > 0 {
+		build.Flags = append(build.Flags, cli.Flags)
+	}
+	if len(cli.Asmflags) > 0 {
+		build.Asmflags = append(build.Asmflags, cli.Asmflags)
+	}
+	if len(cli.Gcflags) > 0 {
+		build.Gcflags = append(build.Gcflags, cli.Gcflags)
+	}
+	if len(cli.Ldflags) > 0 {
+		build.Ldflags = append(build.Ldflags, cli.Ldflags)
+	}
+	if len(cli.Tags) > 0 {
+		build.Tags = append(build.Tags, cli.Tags)
+	}
+	if len(cli.GoBinary) > 0 {
+		build.GoBinary = cli.GoBinary
+	}
+
+	if len(cfg.Before.Hooks) > 0 {
+		for _, cmd := range cfg.Before.Hooks {
+			build.Hooks.Pre = append(build.Hooks.Pre, config.Hook{
+				Cmd: cmd,
+			})
+		}
+		cfg.Before.Hooks = nil
+	}
+	for _, cmd := range cli.PreHooks {
+		build.Hooks.Pre = append(build.Hooks.Pre, config.Hook{
+			Cmd: cmd,
+		})
+	}
+
+	build.Hooks.Post = append(build.Hooks.Post, config.Hook{
+		Cmd: `cp "{{ .Path }}" /usr/local/bin/{{ .ProjectName }}`,
+	})
+	for _, cmd := range cli.PostHooks {
+		build.Hooks.Post = append(build.Hooks.Post, config.Hook{
+			Cmd: cmd,
+		})
+	}
+
+	var archive config.Archive
+	if len(cfg.Archives) == 1 {
+		archive = cfg.Archives[0]
+	} else if len(cfg.Archives) > 1 {
+		return "", "", errors.New("multiple archives found, please specify one")
+	}
+
 	for _, f := range cli.Files {
-		arFiles = append(arFiles, config.File{
+		archive.Files = append(archive.Files, config.File{
 			Source: f,
 		})
 	}
+	if archive.Replacements == nil {
+		archive.Replacements = make(map[string]string)
+	}
+	for k, v := range cli.Replacements {
+		archive.Replacements[k] = v
+	}
 
-	var buildPreHooks []config.Hook
-	for _, cmd := range cli.PreHooks {
-		buildPreHooks = append(buildPreHooks, config.Hook{
-			Cmd: cmd,
+	winOverride := false
+	for _, o := range archive.FormatOverrides {
+		if o.Goos == "windows" {
+			winOverride = true
+			break
+		}
+	}
+	if !winOverride {
+		archive.FormatOverrides = append(archive.FormatOverrides, config.FormatOverride{
+			Goos:   "windows",
+			Format: "zip",
 		})
 	}
 
-	var buildPostHooks = []config.Hook{
-		{
-			Cmd: `cp "{{ .Path }}" /usr/local/bin/{{ .ProjectName }}`,
-		},
+	cfg.Builds = []config.Build{build}
+	cfg.Archives = []config.Archive{archive}
+
+	if !reflect.DeepEqual(cfg.Checksum, config.Checksum{}) {
+		log.Printf("WARN: checksum section specified in your config file is disabled")
 	}
-	for _, cmd := range cli.PostHooks {
-		buildPostHooks = append(buildPostHooks, config.Hook{
-			Cmd: cmd,
-		})
+	cfg.Checksum = config.Checksum{Disable: true}
+
+	if !reflect.DeepEqual(cfg.Release, config.Release{}) {
+		log.Printf("WARN: release section specified in your config file disabled")
+	}
+	cfg.Release = config.Release{Disable: true}
+
+	if !reflect.DeepEqual(cfg.Changelog, config.Changelog{}) {
+		log.Printf("WARN: changelog section specified in your config file skipped")
+	}
+	cfg.Changelog = config.Changelog{Skip: true}
+
+	if len(cfg.NFPMs) > 0 && target.Os != "linux" {
+		log.Printf("WARN: nfpms section specified in your config file disabled")
+		cfg.NFPMs = nil
 	}
 
-	var flags config.FlagArray
-	if len(cli.Flags) > 0 {
-		flags = append(flags, cli.Flags)
-	}
-
-	var asmflags config.StringArray
-	if len(cli.Asmflags) > 0 {
-		asmflags = append(asmflags, cli.Asmflags)
-	}
-
-	var gcflags config.StringArray
-	if len(cli.Gcflags) > 0 {
-		gcflags = append(gcflags, cli.Gcflags)
-	}
-
-	var ldflags config.StringArray
-	if len(cli.Ldflags) > 0 {
-		ldflags = append(ldflags, cli.Ldflags)
-	}
-
-	var tags config.FlagArray
-	if len(cli.Tags) > 0 {
-		tags = append(tags, cli.Tags)
-	}
-
-	b, err := yaml.Marshal(&config.Project{
-		ProjectName: cli.Name,
-		Dist:        dist,
-		Builds: []config.Build{
-			{
-				Main:     cli.Main,
-				Flags:    flags,
-				Asmflags: asmflags,
-				Gcflags:  gcflags,
-				Ldflags:  ldflags,
-				Tags:     tags,
-				Goos:     []string{target.Os},
-				Goarch:   []string{target.Arch},
-				Goarm:    []string{target.Arm},
-				Gomips:   []string{target.Mips},
-				Env:      append([]string{"CGO_ENABLED=0"}, cli.Envs...),
-				GoBinary: cli.GoBinary,
-				Hooks: config.BuildHookConfig{
-					Pre:  buildPreHooks,
-					Post: buildPostHooks,
-				},
-			},
-		},
-		Archives: []config.Archive{
-			{
-				Replacements: cli.Replacements,
-				FormatOverrides: []config.FormatOverride{
-					{
-						Goos:   "windows",
-						Format: "zip",
-					},
-				},
-				Files: arFiles,
-			},
-		},
-		Checksum: config.Checksum{
-			Disable: true,
-		},
-		Release: config.Release{
-			Disable: true,
-		},
-		Changelog: config.Changelog{
-			Skip: true,
-		},
-	})
+	b, err := yaml.Marshal(cfg)
 	if err != nil {
 		return "", "", err
 	}
 
-	file, err := ioutil.TempFile(os.TempDir(), ".goreleaser.yml")
+	f, err := ioutil.TempFile(os.TempDir(), ".goreleaser.yml")
 	if err != nil {
 		return "", "", err
 	}
-	if err := ioutil.WriteFile(file.Name(), b, 0644); err != nil {
-		_ = os.Remove(file.Name())
+	defer f.Close()
+	if err := ioutil.WriteFile(f.Name(), b, 0644); err != nil {
+		defer os.Remove(f.Name())
 		return "", "", err
 	}
 
@@ -133,5 +196,5 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 		}
 	}
 
-	return file.Name(), dist, nil
+	return f.Name(), cfg.Dist, nil
 }

@@ -32,6 +32,7 @@ type Cli struct {
 	Debug        bool              `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
 	GitRef       string            `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
 	GoReleaser   string            `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
+	Config       string            `kong:"name='config',type='path',env='GORELEASER_CONFIG',help='Load GoReleaser configuration from file.'"`
 	GoBinary     string            `kong:"name='go-binary',env='GORELEASER_GOBINARY',help='Set a specific go binary to use when building.'"`
 	Name         string            `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
 	Dist         string            `kong:"name='dist',env='GORELEASER_DIST',default='./dist',help='Dist folder where artifact will be stored.'"`
@@ -195,13 +196,13 @@ func main() {
 				if err := copyFile(path.Join("/usr/local/bin", cli.Name), atfPath); err != nil {
 					log.Fatalf("ERR: cannot copy binary: %v", err)
 				}
-				log.Printf("INF: binary created: %s", atfPath)
+				log.Printf("INF: %s", atfPath)
 			case "archive":
 				atfPath = path.Join(cli.Dist, fi.Name())
 				if err := copyFile(path.Join(fdist.Name(), fi.Name()), atfPath); err != nil {
 					log.Fatalf("ERR: cannot copy archive: %v", err)
 				}
-				log.Printf("INF: archive created: %s", atfPath)
+				log.Printf("INF: %s", atfPath)
 			default:
 				log.Fatalf("ERR: unknown artifact type: %s", atf)
 			}

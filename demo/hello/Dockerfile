@@ -15,13 +15,11 @@ RUN --mount=type=bind,source=.,target=/src,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
+    --config=".goreleaser.yml" \
     --name="xx-hello" \
     --dist="/out" \
     --main="." \
-    --ldflags="-s -w" \
-    --files="README.md" \
-    --pre-hooks="go mod tidy" \
-    --pre-hooks="go mod download"
+    --files="README.md"
 
 FROM scratch AS artifact
 COPY --from=build /out /

@@ -1,0 +1,31 @@
+env:
+  - GO111MODULE=on
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+gomod:
+  proxy: true
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+
+nfpms:
+  - file_name_template: '{{ .ConventionalFileName }}'
+    homepage:  https://github.com/user/hello
+    description: Hello world
+    maintainer: Hello <hello@world.com>
+    license: MIT
+    vendor: HelloWorld
+    formats:
+      - apk
+      - deb
+      - rpm
