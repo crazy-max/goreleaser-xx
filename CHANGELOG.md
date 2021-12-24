@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.2-r0 (2021/12/24)
+
+* GoReleaser 1.2.2 (#76)
+* Allow specifying GoReleaser yaml config (#74)
+
 ## 1.1.0-r5 (2021/12/21)
 
 * Allow list of artifact types (#70 #72)
