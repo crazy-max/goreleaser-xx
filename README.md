@@ -24,6 +24,7 @@ ___
 * [Usage](#usage)
   * [Minimal](#minimal)
   * [Multi-platform image](#multi-platform-image)
+  * [With `.goreleaser.yml`](#with-goreleaseryml)
   * [CGo](#cgo)
 * [Build](#build)
 * [Contributing](#contributing)
@@ -68,6 +69,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 | `--debug`            | `DEBUG`                       | Enable debug (default `false`) |
 | `--git-ref`          | `GIT_REF`                     | The branch or tag like `refs/tags/v1.0.0` (default to your working tree info) |
 | `--goreleaser`       | `GORELEASER_PATH`             | Path to GoReleaser binary (default `/opt/goreleaser-xx/goreleaser`) |
+| `--config`           | `GORELEASER_CONFIG`           | Load GoReleaser configuration from file |
 | `--go-binary`        | `GORELEASER_GOBINARY`         | Set a specific go binary to use when building (default `go`) |
 | `--name`             | `GORELEASER_NAME`             | Project name |
 | `--dist`             | `GORELEASER_DIST`             | Dist folder where artifact will be stored |
@@ -104,7 +106,7 @@ RUN apk add --no-cache git
 WORKDIR /src
 
 FROM base AS vendored
-RUN --mount=type=bind,target=.,rw \
+RUN --mount=type=bind,source=.,target=/src,rw \
   --mount=type=cache,target=/go/pkg/mod \
   go mod tidy && go mod download
 
@@ -173,7 +175,7 @@ RUN apk add --no-cache git
 WORKDIR /src
 
 FROM base AS vendored
-RUN --mount=type=bind,target=.,rw \
+RUN --mount=type=bind,source=.,target=/src,rw \
   --mount=type=cache,target=/go/pkg/mod \
   go mod tidy && go mod download
 
@@ -219,6 +221,69 @@ docker buildx build \
 > `windows/amd64` and `darwin/amd64` platforms have been removed here
 > because `alpine:3.14` does not support them.
 
+### With `.goreleaser.yml`
+
+You can also use a `.goreleaser.yml` to configure your build. 
+
+```yaml
+env:
+  - GO111MODULE=on
+
+gomod:
+  proxy: true
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+
+nfpms:
+  - file_name_template: '{{ .ConventionalFileName }}'
+    homepage:  https://github.com/user/hello
+    description: Hello world
+    maintainer: Hello <hello@world.com>
+    license: MIT
+    vendor: HelloWorld
+    formats:
+      - apk
+      - deb
+      - rpm
+```
+
+```Dockerfile
+# syntax=docker/dockerfile:1.2
+
+FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
+FROM --platform=$BUILDPLATFORM golang:alpine AS base
+COPY --from=goreleaser-xx / /
+RUN apk add --no-cache git
+WORKDIR /src
+
+FROM base AS vendored
+RUN --mount=type=bind,source=.,target=/src,rw \
+  --mount=type=cache,target=/go/pkg/mod \
+  go mod tidy && go mod download
+
+FROM vendored AS build
+ARG TARGETPLATFORM
+RUN --mount=type=bind,source=.,target=/src,rw \
+  --mount=type=cache,target=/root/.cache \
+  --mount=type=cache,target=/go/pkg/mod \
+  goreleaser-xx --debug \
+    --config=".goreleaser.yml" \
+    --name="hello" \
+    --dist="/out" \
+    --main="." \
+    --files="README.md"
+
+FROM scratch AS artifact
+COPY --from=build /out /
+```
+
 ### CGo
 
 If you need to use CGo to build your project, you can use `goreleaser-xx` with
@@ -242,7 +307,7 @@ RUN apk add --no-cache \
 WORKDIR /src
 
 FROM base AS vendored
-RUN --mount=type=bind,target=.,rw \
+RUN --mount=type=bind,source=.,target=/src,rw \
   --mount=type=cache,target=/go/pkg/mod \
   go mod tidy && go mod download
 
