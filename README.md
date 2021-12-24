@@ -48,7 +48,6 @@ ___
 * [Zipper](https://github.com/pratikbalar/zipper)
 * [tarrer](https://github.com/pratikbalar/tarrer)
 
-
 ## Image
 
 | Registry                                                                                                  | Image                                |
