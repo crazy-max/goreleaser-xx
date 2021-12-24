@@ -46,6 +46,8 @@ ___
 * [swarm-cronjob](https://github.com/crazy-max/swarm-cronjob)
 * [yasu](https://github.com/crazy-max/yasu)
 * [Zipper](https://github.com/pratikbalar/zipper)
+* [tarrer](https://github.com/pratikbalar/tarrer)
+
 
 ## Image
 
