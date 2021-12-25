@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.2-r1 (2021/12/25)
+
+* Note about `CGO_ENABLED` (#79)
+* Display `go env` on debug (#78)
+
 ## 1.2.2-r0 (2021/12/24)
 
 * GoReleaser 1.2.2 (#76)
