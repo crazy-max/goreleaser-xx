@@ -59,18 +59,18 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 	if len(cli.Name) > 0 {
 		cfg.ProjectName = cli.Name
 	}
+	cgoEnabledSet := false
 	if len(cli.Envs) > 0 {
-		cgoEnabledSet := false
 		for _, e := range cli.Envs {
 			if strings.HasPrefix(e, "CGO_ENABLED=") {
 				cgoEnabledSet = true
 				break
 			}
 		}
-		if !cgoEnabledSet {
-			cfg.Env = append(cfg.Env, "CGO_ENABLED=0")
-		}
 		cfg.Env = append(cfg.Env, cli.Envs...)
+	}
+	if !cgoEnabledSet {
+		cfg.Env = append(cfg.Env, "CGO_ENABLED=0")
 	}
 	if len(cli.Main) > 0 {
 		build.Main = cli.Main
