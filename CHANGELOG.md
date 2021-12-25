@@ -16,7 +16,7 @@
 ## 1.1.0-r4 (2021/12/20)
 
 * Fix artifact version (#68)
-* CGo usage section
+* CGO usage section
 * Add asmflags, gcflags and tags options (#67)
 * More demos (#66)
 * Add go-binary option (#65)

@@ -1,5 +1,5 @@
 env:
-  - GO111MODULE=on
+  - GO111MODULE=auto
 
 before:
   hooks:
@@ -10,9 +10,7 @@ gomod:
   proxy: true
 
 builds:
-  - env:
-      - CGO_ENABLED=0
-    mod_timestamp: '{{ .CommitTimestamp }}'
+  - mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
     ldflags:

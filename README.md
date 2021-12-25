@@ -25,7 +25,9 @@ ___
   * [Minimal](#minimal)
   * [Multi-platform image](#multi-platform-image)
   * [With `.goreleaser.yml`](#with-goreleaseryml)
-  * [CGo](#cgo)
+  * [CGO](#cgo)
+* [Notes](#notes)
+  * [`CGO_ENABLED`](#cgo_enabled)
 * [Build](#build)
 * [Contributing](#contributing)
 * [License](#license)
@@ -102,6 +104,7 @@ In the following example we are going to build a simple Go application against `
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM golang:alpine AS base
+ENV CGO_ENABLED=0
 COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
 WORKDIR /src
@@ -171,6 +174,7 @@ We can enhance the previous example to also create a multi-platform image in add
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM golang:alpine AS base
+ENV CGO_ENABLED=0
 COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
 WORKDIR /src
@@ -228,15 +232,13 @@ You can also use a `.goreleaser.yml` to configure your build.
 
 ```yaml
 env:
-  - GO111MODULE=on
+  - GO111MODULE=auto
 
 gomod:
   proxy: true
 
 builds:
-  - env:
-      - CGO_ENABLED=0
-    mod_timestamp: '{{ .CommitTimestamp }}'
+  - mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
     ldflags:
@@ -260,6 +262,7 @@ nfpms:
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM golang:alpine AS base
+ENV CGO_ENABLED=0
 COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
 WORKDIR /src
@@ -285,9 +288,9 @@ FROM scratch AS artifact
 COPY --from=build /out /
 ```
 
-### CGo
+### CGO
 
-If you need to use CGo to build your project, you can use `goreleaser-xx` with
+If you need to use CGO to build your project, you can use `goreleaser-xx` with
 [`tonistiigi/xx`](https://github.com/tonistiigi/xx):
 
 ```dockerfile
@@ -296,6 +299,7 @@ If you need to use CGo to build your project, you can use `goreleaser-xx` with
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.0 AS xx
 FROM --platform=$BUILDPLATFORM golang:alpine AS base
+ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
 COPY --from=xx / /
 RUN apk add --no-cache \
@@ -327,7 +331,6 @@ RUN --mount=type=bind,source=.,target=/src,rw \
     --name="myapp" \
     --dist="/out" \
     --ldflags="-s -w -X 'main.version={{.Version}}'" \
-    --envs="CGO_ENABLED=1" \
     --files="LICENSE" \
     --files="README.md"
 
@@ -338,6 +341,15 @@ FROM scratch
 COPY --from=build /usr/local/bin/myapp /myapp
 ENTRYPOINT [ "/myapp" ]
 ```
+
+## Notes
+
+### `CGO_ENABLED`
+
+By default, CGO is enabled in Go when compiling for native architecture and
+disabled when cross-compiling. It's therefore recommended to always set
+`CGO_ENABLED=0` or `CGO_ENABLED=1` when cross-compiling depending on whether
+you need to use CGO or not.
 
 ## Build
 

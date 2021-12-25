@@ -31,6 +31,12 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
+	if len(cli.Name) > 0 {
+		cfg.ProjectName = cli.Name
+	}
+	if len(cli.Envs) > 0 {
+		cfg.Env = append(cfg.Env, cli.Envs...)
+	}
 
 	var build config.Build
 	if len(cfg.Builds) == 1 {
@@ -56,22 +62,6 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 	build.Goarm = []string{target.Arm}
 	build.Gomips = []string{target.Mips}
 
-	if len(cli.Name) > 0 {
-		cfg.ProjectName = cli.Name
-	}
-	cgoEnabledSet := false
-	if len(cli.Envs) > 0 {
-		for _, e := range cli.Envs {
-			if strings.HasPrefix(e, "CGO_ENABLED=") {
-				cgoEnabledSet = true
-				break
-			}
-		}
-		cfg.Env = append(cfg.Env, cli.Envs...)
-	}
-	if !cgoEnabledSet {
-		cfg.Env = append(cfg.Env, "CGO_ENABLED=0")
-	}
 	if len(cli.Main) > 0 {
 		build.Main = cli.Main
 	}
