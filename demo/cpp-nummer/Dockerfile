@@ -8,6 +8,7 @@ FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_BASE} AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
+ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
 COPY --from=xx / /
 RUN apk add --no-cache \
@@ -37,7 +38,6 @@ RUN --mount=type=bind,source=.,rw \
     --main="." \
     --ldflags="-s -w -linkmode external -extldflags -static" \
     --envs="GO111MODULE=auto" \
-    --envs="CGO_ENABLED=1" \
     --files="README.md"
 
 FROM scratch AS artifact

@@ -5,6 +5,7 @@ ARG GORELEASER_XX_BASE=crazymax/goreleaser-xx:edge
 
 FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_BASE} AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
+ENV CGO_ENABLED=0
 COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
 WORKDIR /src

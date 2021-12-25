@@ -5,9 +5,9 @@ ARG GO_VERSION
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.0 AS xx
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
+ENV CGO_ENABLED=0
 COPY --from=xx / /
 RUN apk --update --no-cache add file git
-ENV CGO_ENABLED=0
 WORKDIR /src
 
 FROM base AS goreleaser
@@ -49,9 +49,9 @@ COPY --from=goreleaser /goreleaser/goreleaser /opt/goreleaser-xx/goreleaser
 COPY --from=build /usr/local/bin/goreleaser-xx /usr/bin/goreleaser-xx
 
 FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS test
-RUN apk --no-cache add git
+ENV CGO_ENABLED=0
+RUN apk --update --no-cache add file git
 WORKDIR /src
-ARG GIT_REF
 RUN git clone --branch v2.7.0 https://github.com/crazy-max/ddns-route53 .
 RUN --mount=type=cache,target=/go/pkg/mod \
   go mod tidy && go mod download
