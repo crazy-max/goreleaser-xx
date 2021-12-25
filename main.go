@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"syscall"
 
@@ -90,9 +92,9 @@ func main() {
 
 	if cli.Debug {
 		log.Println("DBG: environment:")
-		for _, e := range os.Environ() {
-			log.Printf("  %s", e)
-		}
+		printEnv()
+		log.Println("DBG: go env:")
+		printGoenv()
 	}
 
 	// Warn on deprecated flag usage and assign to new flag
@@ -273,4 +275,33 @@ func checksum(filename string) {
 	}
 
 	log.Printf("INF: checksum file created: %s", checksumFile)
+}
+
+func printEnv() {
+	envs := os.Environ()
+	sort.Strings(envs)
+	for _, e := range envs {
+		log.Printf("  %s", e)
+	}
+}
+
+func printGoenv() {
+	bin := "go"
+	if cli.GoBinary != "" {
+		bin = cli.GoBinary
+	}
+	cmd := exec.Command(bin, "env")
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatalf("ERR: %v", err)
+	}
+	err = cmd.Start()
+	if err != nil {
+		log.Fatalf("ERR: %v", err)
+	}
+	defer cmd.Wait()
+	s := bufio.NewScanner(stdout)
+	for s.Scan() {
+		log.Printf("  %s", s.Text())
+	}
 }
