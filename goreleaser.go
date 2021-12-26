@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"io/ioutil"
 	"log"
 	"os"
 	"reflect"
@@ -168,12 +167,12 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 		return "", "", err
 	}
 
-	f, err := ioutil.TempFile(os.TempDir(), ".goreleaser.yml")
+	f, err := os.CreateTemp(os.TempDir(), ".goreleaser.yml")
 	if err != nil {
 		return "", "", err
 	}
 	defer f.Close()
-	if err := ioutil.WriteFile(f.Name(), b, 0644); err != nil {
+	if err := os.WriteFile(f.Name(), b, 0644); err != nil {
 		defer os.Remove(f.Name())
 		return "", "", err
 	}
