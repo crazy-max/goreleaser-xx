@@ -15,7 +15,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"syscall"
 
 	"github.com/alecthomas/kong"
 )
@@ -83,7 +82,7 @@ func main() {
 
 	// Handle os signals
 	channel := make(chan os.Signal)
-	signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(channel, os.Interrupt, SIGTERM)
 	go func() {
 		sig := <-channel
 		log.Printf("WARN: caught signal %v", sig)
