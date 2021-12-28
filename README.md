@@ -8,9 +8,10 @@
 
 ## About
 
-`goreleaser-xx` is a small wrapper around the fantastic [GoReleaser](https://github.com/goreleaser/goreleaser) build
-tool to be able to handle a functional [multi-platform scratch Docker image](https://hub.docker.com/r/crazymax/goreleaser-xx/tags?page=1&ordering=last_updated)
-to ease the integration and cross compilation in a Dockerfile for your Go projects.
+`goreleaser-xx` is a small CLI wrapper for [GoReleaser](https://github.com/goreleaser/goreleaser)
+and available as a [lightweight and multi-platform scratch Docker image](https://hub.docker.com/r/crazymax/goreleaser-xx/tags?page=1&ordering=last_updated)
+to ease the integration and cross compilation in a Dockerfile for your Go
+projects.
 
 ![](.github/goreleaser-xx.gif)
 > Building [yasu](https://github.com/crazy-max/yasu) with `goreleaser-xx`
@@ -38,6 +39,7 @@ ___
 
 * Handle `--platform` in your Dockerfile for multi-platform support
 * Build into any architecture
+* Handle C and C++ compilers ([CGO](#cgo))
 * Translation of [platform ARGs in the global scope](https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope) into Go compiler's target
 * Auto generation of `.goreleaser.yml` config based on target architecture
 * [Demo projects](demo)
@@ -49,9 +51,9 @@ ___
 * [Diun](https://github.com/crazy-max/diun)
 * [FTPGrab](https://github.com/crazy-max/ftpgrab)
 * [swarm-cronjob](https://github.com/crazy-max/swarm-cronjob)
+* [tarrer](https://github.com/pratikbalar/tarrer)
 * [yasu](https://github.com/crazy-max/yasu)
 * [Zipper](https://github.com/pratikbalar/zipper)
-* [tarrer](https://github.com/pratikbalar/tarrer)
 
 ## Image
 
@@ -60,10 +62,21 @@ ___
 | [Docker Hub](https://hub.docker.com/r/crazymax/goreleaser-xx/)                                            | `crazymax/goreleaser-xx`             |
 | [GitHub Container Registry](https://github.com/users/crazy-max/packages/container/package/goreleaser-xx)  | `ghcr.io/crazy-max/goreleaser-xx`    |
 
-## CLI
+Following platforms for this image are available:
 
-`goreleaser-xx` handles basic [GoReleaser customizations](https://goreleaser.com/customization/) to be able
-to generate a minimal `.goreleaser.yml` configuration.
+```
+$ docker run --rm mplatform/mquery crazymax/goreleaser-xx:latest
+Image: crazymax/goreleaser-xx:latest (digest: sha256:c65c481c014abab6d307b190ddf1fcb229a44b6c1845d2f2a53bd06dc0437cd7)
+ * Manifest List: Yes (Image type: application/vnd.docker.distribution.manifest.list.v2+json)
+ * Supported platforms:
+   - linux/amd64
+   - linux/arm/v6
+   - linux/arm/v7
+   - linux/arm64
+   - linux/386
+```
+
+## CLI
 
 ```shell
 docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
@@ -95,11 +108,14 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 
 ## Usage
 
+In order to use it, we will use the `docker buildx` command in the following
+examples. [Buildx](https://github.com/docker/buildx) is a Docker component that
+enables many powerful build features. All builds executed via buildx run with
+[Moby BuildKit](https://github.com/moby/buildkit) builder engine.
+
 ### Minimal
 
-In the following example we are going to build a simple Go application against `linux/amd64`, `linux/arm64`,
-`linux/arm/v7`, `windows/amd64` and `darwin/amd64` platforms using `goreleaser-xx` and
-[buildx](https://github.com/docker/buildx).
+Here is a minimal Dockerfile to build a Go project using `goreleaser-xx`:
 
 ```Dockerfile
 # syntax=docker/dockerfile:1.2
@@ -136,19 +152,52 @@ FROM scratch AS artifact
 COPY --from=build /out /
 ```
 
-Now let's build with buildx:
+* `FROM --platform=$BUILDPLATFORM ...` command will pull an image that will
+  always match the native platform of your machine (e.g., `linux/amd64`). 
+  `BUILDPLATFORM` is part of the [ARGs in the global scope](https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope).
+* `ARG TARGETPLATFORM` is also an ARG in the global scope that will be set
+  to the platform of the target that will default to your current platform or
+  can be defined via the [`--platform` flag](https://docs.docker.com/engine/reference/commandline/buildx_build/#platform)
+  of buildx so `goreleaser-xx` will be able to automatically build against
+  the right platform.
+
+> More details about multi-platform builds in this [blog post](https://medium.com/@tonistiigi/faster-multi-platform-builds-dockerfile-cross-compilation-guide-part-1-ec087c719eaf).
+
+As you can see [`goreleaser-xx` CLI](#cli) handles basic [GoReleaser build customizations](https://goreleaser.com/customization/build/)
+with flags to be able to generate a temp and dynamic `.goreleaser.yml` configuration,
+but you can also include your own [GoReleaser YAML config](#with-goreleaseryml).
+
+Let's run a simple build against the `artifact` target in our Dockerfile:
 
 ```shell
+# build and output content of the artifact stage that contains the archive in ./dist
 docker buildx build \
   --platform "linux/amd64,linux/arm64,linux/arm/v7,windows/amd64,darwin/amd64" \
-  --output "type=local,dest=./dist" \
-  --target "artifact" \
-  --file "./Dockerfile" .
+  --output "./dist" \
+  --target "artifact" .
+
+$ tree ./dist
+./dist
+├── myapp_v1.0.0-SNAPSHOT-00655a9_linux_amd64.tar.gz
+└── myapp_v1.0.0-SNAPSHOT-00655a9_linux_amd64.tar.gz.sha256
 ```
 
-Archives created by GoReleaser will be available in `./dist`:
+Here `linux/amd64` arch is used because it's my current platform. If we want
+to handle more platforms, we need to create a builder instance as building
+multi-platform is currently only supported when using BuildKit with the
+[`docker-container` or `kubernetes` drivers](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver).
 
-```text
+```shell
+# create a builder instance
+$ docker buildx create --name "mybuilder" --use
+
+# now build for other platforms
+$ docker buildx build \
+  --platform "linux/amd64,linux/arm64,linux/arm/v7,windows/amd64,darwin/amd64" \
+  --output "./dist" \
+  --target "artifact" .
+
+$ tree ./dist
 ./dist
 ├── darwin_amd64
 │ ├── myapp_v1.0.0-SNAPSHOT-00655a9_darwin_x86_64.tar.gz
@@ -169,7 +218,8 @@ Archives created by GoReleaser will be available in `./dist`:
 
 ### Multi-platform image
 
-We can enhance the previous example to also create a multi-platform image in addition to the generated artifacts:
+We can enhance the previous example to also create a multi-platform image in
+addition to the generated artifacts:
 
 ```Dockerfile
 # syntax=docker/dockerfile:1.2
@@ -202,35 +252,33 @@ FROM scratch AS artifact
 COPY --from=build /out /
 
 FROM alpine AS image
-RUN apk --update --no-cache add ca-certificates openssl shadow \
-  && addgroup -g 1000 myapp \
-  && adduser -u 1000 -G myapp -s /sbin/nologin -D myapp
+RUN apk --update --no-cache add ca-certificates openssl
 COPY --from=build /usr/local/bin/myapp /usr/local/bin/myapp
-USER myapp
 EXPOSE 8080
 ENTRYPOINT [ "myapp" ]
 ```
 
-As you can see, we have added a new stage called `image`. The artifact of each platform is available with
-`goreleaser-xx` in `/usr/local/bin/{name}` (`build` stage) and will be retrieved and included in your `image` stage
-through `COPY --from=build` instruction.
+As you can see, we have added a new stage called `image`. The artifact of each
+platform is available with `goreleaser-xx` in `/usr/local/bin/{name}`
+(`build` stage) and will be retrieved and included in your `image` stage through
+`COPY --from=build` command.
 
-Now let's build, tag and push our multi-platform image in our favorite registry with buildx:
+Now let's build, tag and push our multi-platform image with buildx:
 
 ```shell
 docker buildx build \
   --tag "user/myapp:latest" \
   --platform "linux/amd64,linux/arm64,linux/arm/v7" \
   --target "image" \
-  --push \
-  --file "./Dockerfile" .
+  --push .
 ```
+
 > `windows/amd64` and `darwin/amd64` platforms have been removed here
 > because `alpine:3.14` does not support them.
 
 ### With `.goreleaser.yml`
 
-You can also use a `.goreleaser.yml` to configure your build. 
+You can also use a `.goreleaser.yml` to configure your build:
 
 ```yaml
 env:
@@ -292,7 +340,7 @@ COPY --from=build /out /
 
 ### CGO
 
-Here are some examples to use CGO to build your project with `goreleaser-xx`
+Here are some examples to use CGO to build your project with `goreleaser-xx`:
 
 #### `crazy-max/xgo`
 
@@ -397,7 +445,8 @@ you need to use CGO or not.
 
 ## Build
 
-Everything is dockerized and handled by [buildx bake](docker-bake.hcl) for an agnostic usage of this repo:
+Everything is dockerized and handled by [buildx bake](docker-bake.hcl) for an
+agnostic usage of this repo:
 
 ```shell
 git clone https://github.com/crazy-max/goreleaser-xx.git goreleaser-xx
