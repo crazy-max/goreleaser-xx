@@ -56,19 +56,3 @@ target "vendor-update" {
   target = "vendor-update"
   output = ["."]
 }
-
-target "test" {
-  inherits = ["_commons", "docker-metadata-action"]
-  target = "test"
-}
-
-target "test-artifact" {
-  inherits = ["test"]
-  target = "test-artifact"
-  output = ["./dist"]
-}
-
-target "test-image" {
-  inherits = ["test"]
-  target = "test-image"
-}

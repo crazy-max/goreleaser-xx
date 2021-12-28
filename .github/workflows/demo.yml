@@ -21,12 +21,14 @@ jobs:
       fail-fast: false
       matrix:
         demo:
-          - c
-          - cpp-hello
+          - c-xgo
+          - c-xx
           - cpp-nummer
-          - echo
-          - gorm
-          - hello
+          - cpp-xgo
+          - cpp-xx
+          - echo-webapp
+          - gorm-xgo
+          - with-config
     services:
       registry:
         image: registry:2
