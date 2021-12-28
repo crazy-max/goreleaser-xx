@@ -32,7 +32,7 @@ RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   goreleaser-xx --debug \
     --go-binary="xx-go" \
-    --name="xx-c" \
+    --name="c-xx" \
     --dist="/out" \
     --artifacts="archive" \
     --artifacts="bin" \
@@ -45,5 +45,5 @@ FROM scratch AS artifact
 COPY --from=build /out /
 
 FROM scratch
-COPY --from=build /usr/local/bin/xx-c /xx-c
-ENTRYPOINT [ "/xx-c" ]
+COPY --from=build /usr/local/bin/c-xx /c-xx
+ENTRYPOINT [ "/c-xx" ]

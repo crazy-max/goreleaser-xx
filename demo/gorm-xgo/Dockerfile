@@ -2,22 +2,11 @@
 
 ARG GO_VERSION=1.17
 ARG GORELEASER_XX_BASE=crazymax/goreleaser-xx:edge
-ARG XX_VERSION=1.1.0
 
 FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_BASE} AS goreleaser-xx
-FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
-
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
+FROM --platform=$BUILDPLATFORM crazymax/xgo:${GO_VERSION} AS base
 ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
-COPY --from=xx / /
-RUN apk add --no-cache \
-    clang \
-    git \
-    file \
-    lld \
-    llvm \
-    pkgconfig
 WORKDIR /src
 
 FROM base AS vendored
@@ -27,25 +16,19 @@ RUN --mount=type=bind,target=.,rw \
 
 FROM vendored AS build
 ARG TARGETPLATFORM
-RUN xx-apk add --no-cache \
-    gcc \
-    musl-dev
-# XX_CC_PREFER_STATIC_LINKER prefers ld to lld in ppc64le and 386.
-ENV XX_CC_PREFER_STATIC_LINKER=1
-RUN --mount=type=bind,source=.,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
-    --go-binary="xx-go" \
-    --name="xx-gorm" \
+    --name="gorm-xgo" \
     --dist="/out" \
     --main="." \
-    --ldflags="-s -w -linkmode external -extldflags -static" \
+    --ldflags="-s -w" \
     --files="README.md"
 
 FROM scratch AS artifact
 COPY --from=build /out /
 
 FROM scratch
-COPY --from=build /usr/local/bin/xx-gorm /xx-gorm
-ENTRYPOINT [ "/xx-gorm" ]
+COPY --from=build /usr/local/bin/gorm-xgo /gorm-xgo
+ENTRYPOINT [ "/gorm-xgo" ]

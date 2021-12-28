@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"os/exec"
 	"reflect"
 	"strings"
 
@@ -12,36 +13,82 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func getGRConfig(cli Cli, target Target) (string, string, error) {
+type GoReleaserConfig struct {
+	Path    string
+	Project config.Project
+}
+
+func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfig, _ error) {
 	var cfg config.Project
 	var err error
 
 	if len(cli.Config) > 0 {
 		b, err := os.ReadFile(cli.Config)
 		if err != nil {
-			return "", "", err
+			return grc, err
 		}
 		if err := yaml.Unmarshal(b, &cfg); err != nil {
-			return "", "", err
+			return grc, err
 		}
 	}
 
+	if len(cfg.Dist) > 0 {
+		log.Printf("WARN: dist specified in your config file is overriden")
+	}
 	cfg.Dist, err = os.MkdirTemp(os.TempDir(), "dist")
 	if err != nil {
-		return "", "", err
+		return grc, err
 	}
 	if len(cli.Name) > 0 {
 		cfg.ProjectName = cli.Name
-	}
-	if len(cli.Envs) > 0 {
-		cfg.Env = append(cfg.Env, cli.Envs...)
 	}
 
 	var build config.Build
 	if len(cfg.Builds) == 1 {
 		build = cfg.Builds[0]
 	} else if len(cfg.Builds) > 1 {
-		return "", "", errors.New("multiple builds found, please specify one")
+		return grc, errors.New("multiple builds found, please specify one")
+	}
+
+	cgoEnabled := false
+	if ok := hasCgoEnabled(os.Environ()); ok {
+		cgoEnabled = true
+	}
+	if ok := hasCgoEnabled(cli.Envs); ok {
+		cgoEnabled = true
+	}
+	if ok := hasCgoEnabled(build.Env); ok {
+		cgoEnabled = true
+	}
+	if cgoEnabled {
+		if len(compilers.Ar) > 0 {
+			if _, err = exec.LookPath(compilers.Ar); err == nil {
+				cfg.Env = append(cfg.Env, "AR="+compilers.Ar)
+			}
+		}
+		if len(compilers.Cc) > 0 {
+			if _, err = exec.LookPath(compilers.Cc); err == nil {
+				cfg.Env = append(cfg.Env, "CC="+compilers.Cc)
+				if len(compilers.CgoCflags) > 0 {
+					cfg.Env = append(cfg.Env, "CGO_CFLAGS="+compilers.CgoCflags)
+				}
+			}
+		}
+		if len(compilers.Cxx) > 0 {
+			if _, err = exec.LookPath(compilers.Cxx); err == nil {
+				cfg.Env = append(cfg.Env, "CXX="+compilers.Cxx)
+				if len(compilers.CgoCxxflags) > 0 {
+					cfg.Env = append(cfg.Env, "CGO_CXXFLAGS="+compilers.CgoCxxflags)
+				}
+			}
+		}
+	}
+	if len(cli.Envs) > 0 {
+		cfg.Env = append(cfg.Env, cli.Envs...)
+	}
+	if len(build.Env) > 0 {
+		cfg.Env = append(cfg.Env, build.Env...)
+		build.Env = nil
 	}
 
 	if len(build.Goos) > 0 {
@@ -98,7 +145,7 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 	}
 
 	build.Hooks.Post = append(build.Hooks.Post, config.Hook{
-		Cmd: `cp "{{ .Path }}" /usr/local/bin/{{ .ProjectName }}`,
+		Cmd: `cp "{{ .Path }}" "/usr/local/bin/{{ .ProjectName }}{{ .Ext }}"`,
 	})
 	for _, cmd := range cli.PostHooks {
 		build.Hooks.Post = append(build.Hooks.Post, config.Hook{
@@ -110,7 +157,7 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 	if len(cfg.Archives) == 1 {
 		archive = cfg.Archives[0]
 	} else if len(cfg.Archives) > 1 {
-		return "", "", errors.New("multiple archives found, please specify one")
+		return grc, errors.New("multiple archives found, please specify one")
 	}
 
 	for _, f := range cli.Files {
@@ -164,17 +211,17 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 
 	b, err := yaml.Marshal(cfg)
 	if err != nil {
-		return "", "", err
+		return grc, err
 	}
 
 	f, err := os.CreateTemp(os.TempDir(), ".goreleaser.yml")
 	if err != nil {
-		return "", "", err
+		return grc, err
 	}
 	defer f.Close()
 	if err := os.WriteFile(f.Name(), b, 0644); err != nil {
 		defer os.Remove(f.Name())
-		return "", "", err
+		return grc, err
 	}
 
 	if cli.Debug {
@@ -185,5 +232,17 @@ func getGRConfig(cli Cli, target Target) (string, string, error) {
 		}
 	}
 
-	return f.Name(), cfg.Dist, nil
+	return GoReleaserConfig{
+		Path:    f.Name(),
+		Project: cfg,
+	}, nil
+}
+
+func hasCgoEnabled(envs []string) bool {
+	for _, e := range envs {
+		if e == "CGO_ENABLED=1" {
+			return true
+		}
+	}
+	return false
 }

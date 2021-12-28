@@ -26,6 +26,8 @@ ___
   * [Multi-platform image](#multi-platform-image)
   * [With `.goreleaser.yml`](#with-goreleaseryml)
   * [CGO](#cgo)
+    * [`crazy-max/xgo`](#crazy-maxxgo)
+    * [`tonistiigi/xx`](#tonistiigixx)
 * [Notes](#notes)
   * [`CGO_ENABLED`](#cgo_enabled)
 * [Build](#build)
@@ -110,13 +112,13 @@ RUN apk add --no-cache git
 WORKDIR /src
 
 FROM base AS vendored
-RUN --mount=type=bind,source=.,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/go/pkg/mod \
   go mod tidy && go mod download
 
 FROM vendored AS build
 ARG TARGETPLATFORM
-RUN --mount=type=bind,source=.,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
@@ -180,13 +182,13 @@ RUN apk add --no-cache git
 WORKDIR /src
 
 FROM base AS vendored
-RUN --mount=type=bind,source=.,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/go/pkg/mod \
   go mod tidy && go mod download
 
 FROM vendored AS build
 ARG TARGETPLATFORM
-RUN --mount=type=bind,source=.,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
@@ -268,13 +270,13 @@ RUN apk add --no-cache git
 WORKDIR /src
 
 FROM base AS vendored
-RUN --mount=type=bind,source=.,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/go/pkg/mod \
   go mod tidy && go mod download
 
 FROM vendored AS build
 ARG TARGETPLATFORM
-RUN --mount=type=bind,source=.,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
@@ -290,8 +292,50 @@ COPY --from=build /out /
 
 ### CGO
 
-If you need to use CGO to build your project, you can use `goreleaser-xx` with
-[`tonistiigi/xx`](https://github.com/tonistiigi/xx):
+Here are some examples to use CGO to build your project with `goreleaser-xx`
+
+#### `crazy-max/xgo`
+
+> https://github.com/crazy-max/xgo
+
+```dockerfile
+# syntax=docker/dockerfile:1.3-labs
+
+FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
+FROM --platform=$BUILDPLATFORM crazymax/xgo:latest AS base
+ENV CGO_ENABLED=1
+COPY --from=xx / /
+WORKDIR /src
+
+FROM base AS vendored
+RUN --mount=type=bind,source=.,rw \
+  --mount=type=cache,target=/go/pkg/mod \
+  go mod tidy && go mod download
+
+FROM vendored AS build
+ARG TARGETPLATFORM
+RUN --mount=type=bind,source=.,rw \
+  --mount=type=cache,target=/root/.cache \
+  --mount=type=cache,target=/go/pkg/mod \
+  goreleaser-xx --debug \
+    --go-binary="xx-go" \
+    --name="myapp" \
+    --dist="/out" \
+    --ldflags="-s -w -X 'main.version={{.Version}}'" \
+    --files="LICENSE" \
+    --files="README.md"
+
+FROM scratch AS artifact
+COPY --from=build /out /
+
+FROM scratch
+COPY --from=build /usr/local/bin/myapp /myapp
+ENTRYPOINT [ "/myapp" ]
+```
+
+#### `tonistiigi/xx`
+
+> https://github.com/tonistiigi/xx
 
 ```dockerfile
 # syntax=docker/dockerfile:1.3-labs
@@ -323,7 +367,7 @@ RUN xx-apk add --no-cache \
     musl-dev
 # XX_CC_PREFER_STATIC_LINKER prefers ld to lld in ppc64le and 386.
 ENV XX_CC_PREFER_STATIC_LINKER=1
-RUN --mount=type=bind,source=.,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \

@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -93,7 +92,7 @@ func main() {
 		log.Println("DBG: environment:")
 		printEnv()
 		log.Println("DBG: go env:")
-		printGoenv()
+		printGoEnv()
 	}
 
 	// Warn on deprecated flag usage and assign to new flag
@@ -120,22 +119,35 @@ func main() {
 		}
 	}
 
-	// Compiler target
 	target := getTarget()
 	if cli.Debug {
-		log.Printf("DBG: target: %+v", target)
+		log.Println("DBG: detected target:")
+		log.Printf("  GOOS=%s", target.Os)
+		log.Printf("  GOARCH=%s", target.Arch)
+		log.Printf("  GOARM=%s", target.Arm)
+		log.Printf("  GOMIPS=%s", target.Mips)
+	}
+
+	compilers := getCompilers(target)
+	if cli.Debug {
+		log.Println("DBG: detected compilers:")
+		log.Printf("  AR=%s", compilers.Ar)
+		log.Printf("  CC=%s", compilers.Cc)
+		log.Printf("  CXX=%s", compilers.Cxx)
+		log.Printf("  CGO_CFLAGS=%s", compilers.CgoCflags)
+		log.Printf("  CGO_CXXFLAGS=%s", compilers.CgoCxxflags)
 	}
 
 	// GoReleaser config
-	grConfig, grDist, err := getGRConfig(cli, target)
+	config, err := getConfig(cli, target, compilers)
 	if err != nil {
 		log.Fatalf("ERR: %v", err)
 	}
 	defer func() {
-		_ = os.Remove(grConfig)
-		_ = os.RemoveAll(grDist)
+		_ = os.Remove(config.Path)
+		_ = os.RemoveAll(config.Project.Dist)
 	}()
-	grFlags = append(grFlags, "release", "--config", grConfig)
+	grFlags = append(grFlags, "release", "--config", config.Path)
 
 	// Git tag
 	if strings.HasPrefix(cli.GitRef, "refs/tags/v") {
@@ -176,7 +188,7 @@ func main() {
 	}
 
 	// Post build
-	fdist, err := os.Open(grDist)
+	fdist, err := os.Open(config.Project.Dist)
 	if err != nil {
 		log.Printf("WARN: cannot open dist folder: %v", err)
 	}
@@ -186,15 +198,21 @@ func main() {
 		log.Printf("WARN: cannot read dist folder: %v", err)
 	}
 	for _, fi := range fis {
-		if fi.IsDir() || strings.HasPrefix(fi.Name(), "config") {
+		if fi.IsDir() || !strings.HasPrefix(fi.Name(), config.Project.ProjectName+"_") {
 			continue
 		}
 		for _, atf := range cli.Artifacts {
 			var atfPath string
 			switch atf {
 			case "bin":
-				atfPath = path.Join(cli.Dist, binaryName(fi))
-				if err := copyFile(path.Join("/usr/local/bin", cli.Name), atfPath); err != nil {
+				binName := config.Project.ProjectName
+				atfName := strings.TrimSuffix(strings.TrimSuffix(fi.Name(), filepath.Ext(fi.Name())), ".tar")
+				if target.Os == "windows" {
+					atfName += ".exe"
+					binName += ".exe"
+				}
+				atfPath = path.Join(cli.Dist, atfName)
+				if err := copyFile(path.Join("/usr/local/bin", binName), atfPath); err != nil {
 					log.Fatalf("ERR: cannot copy binary: %v", err)
 				}
 				log.Printf("INF: %s", atfPath)
@@ -212,14 +230,6 @@ func main() {
 			}
 		}
 	}
-}
-
-func binaryName(fi fs.FileInfo) string {
-	archiveExt := filepath.Ext(fi.Name())
-	if archiveExt != ".zip" {
-		archiveExt = ".tar.gz"
-	}
-	return strings.TrimSuffix(fi.Name(), archiveExt)
 }
 
 func copyFile(src string, dest string) error {
@@ -284,7 +294,7 @@ func printEnv() {
 	}
 }
 
-func printGoenv() {
+func printGoEnv() {
 	bin := "go"
 	if cli.GoBinary != "" {
 		bin = cli.GoBinary

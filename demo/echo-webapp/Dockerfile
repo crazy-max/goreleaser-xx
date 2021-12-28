@@ -17,11 +17,11 @@ RUN --mount=type=bind,target=.,rw \
 
 FROM vendored AS build
 ARG TARGETPLATFORM
-RUN --mount=type=bind,source=.,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
-    --name="xx-echo" \
+    --name="echo-webapp" \
     --dist="/out" \
     --main="." \
     --ldflags="-s -w -X 'main.version={{.Version}}' -X 'main.commit={{.Commit}}' -X 'main.date={{.Date}}'" \
@@ -31,16 +31,7 @@ FROM scratch AS artifact
 COPY --from=build /out /
 
 FROM alpine
-
-RUN apk --update --no-cache add \
-    ca-certificates \
-    libressl \
-    shadow \
-  && addgroup -g 1000 xx-echo \
-  && adduser -u 1000 -G xx-echo -s /sbin/nologin -D xx-echo
-
-COPY --from=build /usr/local/bin/xx-echo /usr/local/bin/xx-echo
-
-USER xx-echo
+RUN apk --update --no-cache add ca-certificates openssl
+COPY --from=build /usr/local/bin/echo-webapp /usr/local/bin/echo-webapp
 EXPOSE 8080
-ENTRYPOINT [ "xx-echo" ]
+ENTRYPOINT [ "echo-webapp" ]

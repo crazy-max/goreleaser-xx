@@ -33,7 +33,7 @@ RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   goreleaser-xx --debug \
     --go-binary="xx-go" \
-    --name="xx-cpp-hello" \
+    --name="cpp-xx" \
     --dist="/out" \
     --artifacts="bin" \
     --main="." \
@@ -45,5 +45,5 @@ FROM scratch AS artifact
 COPY --from=build /out /
 
 FROM scratch
-COPY --from=build /usr/local/bin/xx-cpp-hello /xx-cpp-hello
-ENTRYPOINT [ "/xx-cpp-hello" ]
+COPY --from=build /usr/local/bin/cpp-xx /cpp-xx
+ENTRYPOINT [ "/cpp-xx" ]

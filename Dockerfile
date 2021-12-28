@@ -34,7 +34,7 @@ COPY --from=vendored /out /
 FROM vendored AS build
 ARG GIT_REF
 ARG TARGETPLATFORM
-RUN --mount=type=bind,target=/src,rw \
+RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=target=/go/pkg/mod,type=cache \
   case "$GIT_REF" in \
@@ -47,32 +47,3 @@ RUN --mount=type=bind,target=/src,rw \
 FROM scratch AS release
 COPY --from=goreleaser /goreleaser/goreleaser /opt/goreleaser-xx/goreleaser
 COPY --from=build /usr/local/bin/goreleaser-xx /usr/bin/goreleaser-xx
-
-FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS test
-ENV CGO_ENABLED=0
-RUN apk --update --no-cache add file git
-WORKDIR /src
-RUN git clone --branch v2.7.0 https://github.com/crazy-max/ddns-route53 .
-RUN --mount=type=cache,target=/go/pkg/mod \
-  go mod tidy && go mod download
-COPY --from=release / /
-ARG TARGETPLATFORM
-RUN --mount=type=cache,target=/root/.cache \
-  --mount=type=cache,target=/go/pkg/mod \
-  goreleaser-xx --debug \
-    --name="ddns-route53" \
-    --dist="/dist" \
-    --main="./cmd/main.go" \
-    --ldflags="-s -w -X 'main.version={{.Version}}'" \
-    --files="CHANGELOG.md" \
-    --files="LICENSE" \
-    --files="README.md" \
-    --replacements="386=i386" \
-    --replacements="amd64=x86_64"
-
-FROM scratch AS test-artifact
-COPY --from=test /dist /
-
-FROM alpine AS test-image
-COPY --from=test /usr/local/bin/ddns-route53 /usr/local/bin/ddns-route53
-RUN ddns-route53 --version
