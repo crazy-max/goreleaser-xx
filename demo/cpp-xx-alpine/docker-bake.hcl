@@ -14,7 +14,7 @@ group "default" {
 
 target "image" {
   inherits = ["_commons"]
-  tags = ["cpp-xx:local"]
+  tags = ["cpp-xx-alpine:local"]
 }
 
 target "image-local" {

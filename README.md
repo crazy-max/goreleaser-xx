@@ -121,7 +121,7 @@ Here is a minimal Dockerfile to build a Go project using `goreleaser-xx`:
 # syntax=docker/dockerfile:1.2
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
-FROM --platform=$BUILDPLATFORM golang:alpine AS base
+FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS base
 ENV CGO_ENABLED=0
 COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
@@ -225,7 +225,7 @@ addition to the generated artifacts:
 # syntax=docker/dockerfile:1.2
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
-FROM --platform=$BUILDPLATFORM golang:alpine AS base
+FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS base
 ENV CGO_ENABLED=0
 COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
@@ -311,7 +311,7 @@ nfpms:
 # syntax=docker/dockerfile:1.2
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
-FROM --platform=$BUILDPLATFORM golang:alpine AS base
+FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS base
 ENV CGO_ENABLED=0
 COPY --from=goreleaser-xx / /
 RUN apk add --no-cache git
@@ -350,9 +350,9 @@ Here are some examples to use CGO to build your project with `goreleaser-xx`:
 # syntax=docker/dockerfile:1.3-labs
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
-FROM --platform=$BUILDPLATFORM crazymax/xgo:latest AS base
+FROM --platform=$BUILDPLATFORM crazymax/xgo:1.17 AS base
 ENV CGO_ENABLED=1
-COPY --from=xx / /
+COPY --from=goreleaser-xx / /
 WORKDIR /src
 
 FROM base AS vendored
@@ -366,7 +366,6 @@ RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
-    --go-binary="xx-go" \
     --name="myapp" \
     --dist="/out" \
     --ldflags="-s -w -X 'main.version={{.Version}}'" \
@@ -390,7 +389,7 @@ ENTRYPOINT [ "/myapp" ]
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.0 AS xx
-FROM --platform=$BUILDPLATFORM golang:alpine AS base
+FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS base
 ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
 COPY --from=xx / /
@@ -410,9 +409,7 @@ RUN --mount=type=bind,source=.,target=/src,rw \
 
 FROM vendored AS build
 ARG TARGETPLATFORM
-RUN xx-apk add --no-cache \
-    gcc \
-    musl-dev
+RUN xx-apk add --no-cache gcc musl-dev
 # XX_CC_PREFER_STATIC_LINKER prefers ld to lld in ppc64le and 386.
 ENV XX_CC_PREFER_STATIC_LINKER=1
 RUN --mount=type=bind,source=.,rw \
