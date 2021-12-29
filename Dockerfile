@@ -45,5 +45,5 @@ RUN --mount=type=bind,source=.,rw \
   && xx-verify --static /usr/local/bin/goreleaser-xx
 
 FROM scratch AS release
-COPY --from=goreleaser /goreleaser/goreleaser /opt/goreleaser-xx/goreleaser
-COPY --from=build /usr/local/bin/goreleaser-xx /usr/bin/goreleaser-xx
+COPY --from=goreleaser /goreleaser/goreleaser /usr/local/bin/goreleaser
+COPY --from=build /usr/local/bin/goreleaser-xx /usr/local/bin/goreleaser-xx
