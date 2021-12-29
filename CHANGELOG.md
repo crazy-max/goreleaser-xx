@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.2-r2 (2021/12/29)
+
+* Lookup GoReleaser binary path (#82)
+* Update demos (#81)
+* Handle C and C++ compilers (#80)
+* Fix binary artifact output
+* Fix artifact extension
+* Move syscall to golang.org/x/sys
+* Move from io/ioutil to os package
+
 ## 1.2.2-r1 (2021/12/25)
 
 * Note about `CGO_ENABLED` (#79)
