@@ -14,7 +14,7 @@ group "default" {
 
 target "image" {
   inherits = ["_commons"]
-  tags = ["c-xx:local"]
+  tags = ["c-xx-alpine:local"]
 }
 
 target "image-local" {
@@ -44,6 +44,7 @@ target "artifact" {
 target "artifact-all" {
   inherits = ["artifact"]
   platforms = [
+    "linux/386",
     "linux/amd64",
     "linux/arm/v6",
     "linux/arm/v7",
