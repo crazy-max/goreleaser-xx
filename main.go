@@ -31,7 +31,7 @@ type Cli struct {
 	Version      kong.VersionFlag
 	Debug        bool              `kong:"name='debug',env='DEBUG',default='false',help='Enable debug.'"`
 	GitRef       string            `kong:"name='git-ref',env='GIT_REF',help='The branch or tag like refs/tags/v1.0.0 (default to your working tree info).'"`
-	GoReleaser   string            `kong:"name='goreleaser',env='GORELEASER_PATH',default='/opt/goreleaser-xx/goreleaser',help='Path to GoReleaser binary.'"`
+	GoReleaser   string            `kong:"name='goreleaser',env='GORELEASER_PATH',default='goreleaser',help='Set a specific GoReleaser binary to use.'"`
 	Config       string            `kong:"name='config',type='path',env='GORELEASER_CONFIG',help='Load GoReleaser configuration from file.'"`
 	GoBinary     string            `kong:"name='go-binary',env='GORELEASER_GOBINARY',help='Set a specific go binary to use when building.'"`
 	Name         string            `kong:"name='name',env='GORELEASER_NAME',help='Project name.'"`
@@ -60,7 +60,6 @@ type Cli struct {
 
 func main() {
 	var err error
-	var grFlags []string
 
 	// Parse command line
 	ctx := kong.Parse(&cli,
@@ -119,6 +118,13 @@ func main() {
 		}
 	}
 
+	// Seek GoReleaser bin
+	goreleaserPath, err := exec.LookPath(cli.GoReleaser)
+	if err != nil {
+		log.Fatalf("ERR: %s not found in PATH", cli.GoReleaser)
+	}
+
+	// Get target
 	target := getTarget()
 	if cli.Debug {
 		log.Println("DBG: detected target:")
@@ -128,6 +134,7 @@ func main() {
 		log.Printf("  GOMIPS=%s", target.Mips)
 	}
 
+	// Get compilers
 	compilers := getCompilers(target)
 	if cli.Debug {
 		log.Println("DBG: detected compilers:")
@@ -147,7 +154,9 @@ func main() {
 		_ = os.Remove(config.Path)
 		_ = os.RemoveAll(config.Project.Dist)
 	}()
-	grFlags = append(grFlags, "release", "--config", config.Path)
+
+	// Set GoReleaser flags
+	goreleaserFlags := []string{"release", "--config", config.Path}
 
 	// Git tag
 	if strings.HasPrefix(cli.GitRef, "refs/tags/v") {
@@ -164,7 +173,7 @@ func main() {
 	gitDirty := isGitDirty()
 	gitWrongRef := isWrongRef(gitTag)
 	if gitDirty || gitWrongRef || cli.Snapshot {
-		grFlags = append(grFlags, "--snapshot")
+		goreleaserFlags = append(goreleaserFlags, "--snapshot")
 	}
 
 	// Git status
@@ -174,8 +183,8 @@ func main() {
 	log.Printf("  wrongref=%t", gitWrongRef)
 
 	// Start GoReleaser
-	log.Printf("INF: %s %s", cli.GoReleaser, strings.Join(grFlags, " "))
-	goreleaser := exec.Command(cli.GoReleaser, grFlags...)
+	log.Printf("INF: %s %s", goreleaserPath, strings.Join(goreleaserFlags, " "))
+	goreleaser := exec.Command(cli.GoReleaser, goreleaserFlags...)
 	goreleaser.Stdout = os.Stdout
 	goreleaser.Stderr = os.Stderr
 	if err := goreleaser.Run(); err != nil {
@@ -269,7 +278,7 @@ func checksum(filename string) {
 	h := sha256.New()
 	_, err = io.Copy(h, file)
 	if err != nil {
-		log.Fatalf("ERR: failed to checksum: %v", err)
+		log.Fatalf("ERR: failed to create checksum: %v", err)
 	}
 
 	sha256file, err := os.OpenFile(checksumFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)

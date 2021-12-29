@@ -86,7 +86,7 @@ docker run --rm -t crazymax/goreleaser-xx:latest goreleaser-xx --help
 |----------------------|-------------------------------|---------------|
 | `--debug`            | `DEBUG`                       | Enable debug (default `false`) |
 | `--git-ref`          | `GIT_REF`                     | The branch or tag like `refs/tags/v1.0.0` (default to your working tree info) |
-| `--goreleaser`       | `GORELEASER_PATH`             | Path to GoReleaser binary (default `/opt/goreleaser-xx/goreleaser`) |
+| `--goreleaser`       | `GORELEASER_PATH`             | Set a specific GoReleaser binary to use (default `goreleaser`) |
 | `--config`           | `GORELEASER_CONFIG`           | Load GoReleaser configuration from file |
 | `--go-binary`        | `GORELEASER_GOBINARY`         | Set a specific go binary to use when building (default `go`) |
 | `--name`             | `GORELEASER_NAME`             | Project name |
@@ -259,9 +259,9 @@ ENTRYPOINT [ "myapp" ]
 ```
 
 As you can see, we have added a new stage called `image`. The artifact of each
-platform is available with `goreleaser-xx` in `/usr/local/bin/{name}`
-(`build` stage) and will be retrieved and included in your `image` stage through
-`COPY --from=build` command.
+platform is available with `goreleaser-xx` in `/usr/local/bin/{{ .ProjectName }}{{ .Ext }}`
+(`build` stage) and will be included in your `image` stage via `COPY --from=build`
+command.
 
 Now let's build, tag and push our multi-platform image with buildx:
 
