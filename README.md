@@ -172,7 +172,6 @@ Let's run a simple build against the `artifact` target in our Dockerfile:
 ```shell
 # build and output content of the artifact stage that contains the archive in ./dist
 docker buildx build \
-  --platform "linux/amd64,linux/arm64,linux/arm/v7,windows/amd64,darwin/amd64" \
   --output "./dist" \
   --target "artifact" .
 
