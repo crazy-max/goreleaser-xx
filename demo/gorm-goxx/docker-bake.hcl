@@ -14,7 +14,7 @@ group "default" {
 
 target "image" {
   inherits = ["_commons"]
-  tags = ["gorm-xgo:local"]
+  tags = ["gorm-goxx:local"]
 }
 
 target "image-local" {

@@ -27,7 +27,7 @@ ___
   * [Multi-platform image](#multi-platform-image)
   * [With `.goreleaser.yml`](#with-goreleaseryml)
   * [CGO](#cgo)
-    * [`crazy-max/xgo`](#crazy-maxxgo)
+    * [`crazy-max/goxx`](#crazy-maxgoxx)
     * [`tonistiigi/xx`](#tonistiigixx)
 * [Notes](#notes)
   * [`CGO_ENABLED`](#cgo_enabled)
@@ -341,15 +341,15 @@ COPY --from=build /out /
 
 Here are some examples to use CGO to build your project with `goreleaser-xx`:
 
-#### `crazy-max/xgo`
+#### `crazy-max/goxx`
 
-> https://github.com/crazy-max/xgo
+> https://github.com/crazy-max/goxx
 
 ```dockerfile
 # syntax=docker/dockerfile:1.3-labs
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
-FROM --platform=$BUILDPLATFORM crazymax/xgo:1.17 AS base
+FROM --platform=$BUILDPLATFORM crazymax/goxx:1.17 AS base
 ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
 WORKDIR /src
