@@ -127,7 +127,7 @@ func main() {
 	// Get target
 	target := getTarget()
 	if cli.Debug {
-		log.Println("DBG: detected target:")
+		log.Println("DBG: target:")
 		log.Printf("  GOOS=%s", target.Os)
 		log.Printf("  GOARCH=%s", target.Arch)
 		log.Printf("  GOARM=%s", target.Arm)
@@ -137,7 +137,7 @@ func main() {
 	// Get compilers
 	compilers := getCompilers(target)
 	if cli.Debug {
-		log.Println("DBG: detected compilers:")
+		log.Println("DBG: compilers:")
 		log.Printf("  AR=%s", compilers.Ar)
 		log.Printf("  CC=%s", compilers.Cc)
 		log.Printf("  CXX=%s", compilers.Cxx)

@@ -161,5 +161,21 @@ func getCompilers(t Target) (cp Compilers) {
 		cp.Cxx = "s390x-linux-gnu-g++"
 	}
 
+	if v := os.Getenv("AR"); v != "" {
+		cp.Ar = v
+	}
+	if v := os.Getenv("CC"); v != "" {
+		cp.Cc = v
+	}
+	if v := os.Getenv("CXX"); v != "" {
+		cp.Cxx = v
+	}
+	if v := os.Getenv("CGO_CFLAGS"); v != "" {
+		cp.CgoCflags = v
+	}
+	if v := os.Getenv("CGO_CXXFLAGS"); v != "" {
+		cp.CgoCxxflags = v
+	}
+
 	return
 }
