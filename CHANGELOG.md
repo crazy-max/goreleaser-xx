@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.4-r0 (2021/12/31)
+
+* GoReleaser 1.2.4 (#84)
+* Update CGO examples with [goxx](https://github.com/crazy-max/goxx) (#83)
+
 ## 1.2.2-r2 (2021/12/29)
 
 * Lookup GoReleaser binary path (#82)
