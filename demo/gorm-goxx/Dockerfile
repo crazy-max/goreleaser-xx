@@ -4,7 +4,7 @@ ARG GO_VERSION=1.17
 ARG GORELEASER_XX_BASE=crazymax/goreleaser-xx:edge
 
 FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_BASE} AS goreleaser-xx
-FROM --platform=$BUILDPLATFORM crazymax/xgo:${GO_VERSION} AS base
+FROM --platform=$BUILDPLATFORM crazymax/goxx:${GO_VERSION} AS base
 ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
 WORKDIR /src
@@ -20,7 +20,7 @@ RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
-    --name="gorm-xgo" \
+    --name="gorm-goxx" \
     --dist="/out" \
     --main="." \
     --ldflags="-s -w" \
@@ -30,5 +30,5 @@ FROM scratch AS artifact
 COPY --from=build /out /
 
 FROM scratch
-COPY --from=build /usr/local/bin/gorm-xgo /gorm-xgo
-ENTRYPOINT [ "/gorm-xgo" ]
+COPY --from=build /usr/local/bin/gorm-goxx /gorm-goxx
+ENTRYPOINT [ "/gorm-goxx" ]

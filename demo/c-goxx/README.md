@@ -1,5 +1,5 @@
 ```shell
-# build docker image and output to docker with gorm-xgo:local tag (default)
+# build docker image and output to docker with c-goxx:local tag (default)
 docker buildx bake image-local
 
 # build multi-platform image

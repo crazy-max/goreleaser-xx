@@ -21,14 +21,14 @@ jobs:
       fail-fast: false
       matrix:
         demo:
-          - c-xgo
+          - c-goxx
           - c-xx-alpine
           - c-xx-debian
           - cpp-nummer
-          - cpp-xgo
+          - cpp-goxx
           - cpp-xx-alpine
           - echo-webapp
-          - gorm-xgo
+          - gorm-goxx
           - with-config
     services:
       registry:
