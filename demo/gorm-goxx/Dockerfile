@@ -7,6 +7,7 @@ FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_BASE} AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM crazymax/goxx:${GO_VERSION} AS base
 ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
+RUN apt-get update && apt-get install --no-install-recommends -y git
 WORKDIR /src
 
 FROM base AS vendored
@@ -16,6 +17,7 @@ RUN --mount=type=bind,target=.,rw \
 
 FROM vendored AS build
 ARG TARGETPLATFORM
+RUN goxx-apt-get install -y binutils gcc g++ pkg-config
 RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
