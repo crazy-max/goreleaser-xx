@@ -9,7 +9,7 @@ ENV GO111MODULE=auto
 ENV CGO_ENABLED=1
 ENV OSXCROSS_MP_INC=1
 COPY --from=goreleaser-xx / /
-RUN apt-get update && apt-get install --no-install-recommends -y git
+RUN goxx-apt-get install --no-install-recommends -y git
 WORKDIR /src
 
 FROM base AS build
