@@ -7,7 +7,7 @@ FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_BASE} AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM crazymax/goxx:${GO_VERSION} AS base
 ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
-RUN apt-get update && apt-get install --no-install-recommends -y git
+RUN goxx-apt-get install --no-install-recommends -y git
 WORKDIR /src
 
 FROM base AS vendored
