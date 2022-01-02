@@ -206,7 +206,7 @@ func main() {
 		log.Printf("WARN: cannot read dist folder: %v", err)
 	}
 	for _, fi := range fis {
-		if fi.IsDir() || !strings.HasPrefix(fi.Name(), config.Project.ProjectName) {
+		if fi.IsDir() {
 			continue
 		}
 		archiveExt := ""
@@ -231,16 +231,15 @@ func main() {
 					if err := copyFile(path.Join("/usr/local/bin", binName), atfPath); err != nil {
 						log.Fatalf("ERR: cannot copy binary: %v", err)
 					}
-					log.Printf("INF: %s", atfPath)
 				case "archive":
 					atfPath = path.Join(cli.Dist, fi.Name())
 					if err := copyFile(path.Join(fdist.Name(), fi.Name()), atfPath); err != nil {
 						log.Fatalf("ERR: cannot copy archive: %v", err)
 					}
-					log.Printf("INF: %s", atfPath)
 				default:
 					log.Fatalf("ERR: unknown artifact type: %s", atf)
 				}
+				log.Printf("INF: successfully created: %s", atfPath)
 				if cli.Checksum {
 					checksum(atfPath)
 				}
@@ -250,7 +249,7 @@ func main() {
 			if err := copyFile(path.Join(fdist.Name(), fi.Name()), atfPath); err != nil {
 				log.Fatalf("ERR: cannot copy from dist: %v", err)
 			}
-			log.Printf("INF: %s", atfPath)
+			log.Printf("INF: successfully created: %s", atfPath)
 		}
 	}
 }
