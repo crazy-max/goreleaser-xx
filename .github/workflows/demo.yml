@@ -29,6 +29,7 @@ jobs:
           - cpp-xx-alpine
           - echo-webapp
           - gorm-goxx
+          - jq-goxx
           - with-config
     services:
       registry:

@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.3-labs
+# syntax=docker/dockerfile:1
 
 ARG GO_VERSION="1.17"
 ARG GORELEASER_XX_BASE="crazymax/goreleaser-xx:edge"
