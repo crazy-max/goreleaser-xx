@@ -118,7 +118,7 @@ enables many powerful build features. All builds executed via buildx run with
 Here is a minimal Dockerfile to build a Go project using `goreleaser-xx`:
 
 ```Dockerfile
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS base
@@ -221,7 +221,7 @@ We can enhance the previous example to also create a multi-platform image in
 addition to the generated artifacts:
 
 ```Dockerfile
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS base
@@ -307,7 +307,7 @@ nfpms:
 ```
 
 ```Dockerfile
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS base
@@ -346,7 +346,7 @@ Here are some examples to use CGO to build your project with `goreleaser-xx`:
 > https://github.com/crazy-max/goxx
 
 ```dockerfile
-# syntax=docker/dockerfile:1.3-labs
+# syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM crazymax/goxx:1.17 AS base
@@ -388,7 +388,7 @@ ENTRYPOINT [ "/myapp" ]
 > https://github.com/tonistiigi/xx
 
 ```dockerfile
-# syntax=docker/dockerfile:1.3-labs
+# syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.0 AS xx
