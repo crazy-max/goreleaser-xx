@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.5-r0 (2022/01/02)
+
+* GoReleaser 1.2.5 (#90)
+* jq example (#89)
+* Handle snaps and brews (#87)
+* Handle alt packages (#88)
+* Update goxx example (#86)
+* Override compilers (#85)
+
 ## 1.2.4-r0 (2021/12/31)
 
 * GoReleaser 1.2.4 (#84)
