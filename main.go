@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -207,36 +206,51 @@ func main() {
 		log.Printf("WARN: cannot read dist folder: %v", err)
 	}
 	for _, fi := range fis {
-		if fi.IsDir() || !strings.HasPrefix(fi.Name(), config.Project.ProjectName+"_") {
+		if fi.IsDir() || !strings.HasPrefix(fi.Name(), config.Project.ProjectName) {
 			continue
 		}
-		for _, atf := range cli.Artifacts {
-			var atfPath string
-			switch atf {
-			case "bin":
-				binName := config.Project.ProjectName
-				atfName := strings.TrimSuffix(strings.TrimSuffix(fi.Name(), filepath.Ext(fi.Name())), ".tar")
-				if target.Os == "windows" {
-					atfName += ".exe"
-					binName += ".exe"
-				}
-				atfPath = path.Join(cli.Dist, atfName)
-				if err := copyFile(path.Join("/usr/local/bin", binName), atfPath); err != nil {
-					log.Fatalf("ERR: cannot copy binary: %v", err)
-				}
-				log.Printf("INF: %s", atfPath)
-			case "archive":
-				atfPath = path.Join(cli.Dist, fi.Name())
-				if err := copyFile(path.Join(fdist.Name(), fi.Name()), atfPath); err != nil {
-					log.Fatalf("ERR: cannot copy archive: %v", err)
-				}
-				log.Printf("INF: %s", atfPath)
-			default:
-				log.Fatalf("ERR: unknown artifact type: %s", atf)
+		archiveExt := ""
+		for _, ext := range []string{".tar.gz", ".tar.xz", ".tar", ".gz", ".zip"} {
+			if strings.HasSuffix(fi.Name(), ext) {
+				archiveExt = ext
+				break
 			}
-			if cli.Checksum {
-				checksum(atfPath)
+		}
+		if len(archiveExt) > 0 {
+			for _, atf := range cli.Artifacts {
+				var atfPath string
+				switch atf {
+				case "bin":
+					binName := config.Project.ProjectName
+					atfName := strings.TrimSuffix(fi.Name(), archiveExt)
+					if target.Os == "windows" {
+						atfName += ".exe"
+						binName += ".exe"
+					}
+					atfPath = path.Join(cli.Dist, atfName)
+					if err := copyFile(path.Join("/usr/local/bin", binName), atfPath); err != nil {
+						log.Fatalf("ERR: cannot copy binary: %v", err)
+					}
+					log.Printf("INF: %s", atfPath)
+				case "archive":
+					atfPath = path.Join(cli.Dist, fi.Name())
+					if err := copyFile(path.Join(fdist.Name(), fi.Name()), atfPath); err != nil {
+						log.Fatalf("ERR: cannot copy archive: %v", err)
+					}
+					log.Printf("INF: %s", atfPath)
+				default:
+					log.Fatalf("ERR: unknown artifact type: %s", atf)
+				}
+				if cli.Checksum {
+					checksum(atfPath)
+				}
 			}
+		} else {
+			atfPath := path.Join(cli.Dist, fi.Name())
+			if err := copyFile(path.Join(fdist.Name(), fi.Name()), atfPath); err != nil {
+				log.Fatalf("ERR: cannot copy from dist: %v", err)
+			}
+			log.Printf("INF: %s", atfPath)
 		}
 	}
 }
