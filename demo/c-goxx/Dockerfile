@@ -12,7 +12,8 @@ WORKDIR /go/src/github.com/crazy-max/goreleaser-xx/demo/c
 
 FROM base AS build
 ARG TARGETPLATFORM
-RUN goxx-apt-get install -y binutils gcc g++ pkg-config
+RUN --mount=type=cache,target=/var/cache/apt \
+  goxx-apt-get install -y binutils gcc g++ pkg-config
 RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
