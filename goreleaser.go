@@ -33,7 +33,7 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 	}
 
 	if len(cfg.Dist) > 0 {
-		log.Printf("WARN: dist specified in your config file is overriden")
+		log.Printf("WARN: dist specified in your config file is overrided")
 	}
 	cfg.Dist, err = os.MkdirTemp(os.TempDir(), "dist")
 	if err != nil {
@@ -92,16 +92,16 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 	}
 
 	if len(build.Goos) > 0 {
-		log.Printf("WARN: goos specified in your config file is overriden")
+		log.Printf("WARN: goos specified in your config file is overrided")
 	}
 	if len(build.Goarch) > 0 {
-		log.Printf("WARN: goarch specified in your config file is overriden")
+		log.Printf("WARN: goarch specified in your config file is overrided")
 	}
 	if len(build.Goarm) > 0 {
-		log.Printf("WARN: goarm specified in your config file is overriden")
+		log.Printf("WARN: goarm specified in your config file is overrided")
 	}
 	if len(build.Gomips) > 0 {
-		log.Printf("WARN: gomips specified in your config file is overriden")
+		log.Printf("WARN: gomips specified in your config file is overrided")
 	}
 	build.Goos = []string{target.Os}
 	build.Goarch = []string{target.Arch}
@@ -204,9 +204,19 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 	}
 	cfg.Changelog = config.Changelog{Skip: true}
 
-	if len(cfg.NFPMs) > 0 && target.Os != "linux" {
-		log.Printf("WARN: nfpms section specified in your config file disabled")
+	if len(cfg.NFPMs) > 0 && !allowNfpms(target) {
+		log.Printf("WARN: nfpms section specified in your config file disabled for %s", formatTarget(target))
 		cfg.NFPMs = nil
+	}
+
+	if len(cfg.Brews) > 0 && !allowBrews(target) {
+		log.Printf("WARN: brews section specified in your config file disabled for %s", formatTarget(target))
+		cfg.Brews = nil
+	}
+
+	if len(cfg.Snapcrafts) > 0 && !allowSnaps(target) {
+		log.Printf("WARN: snapcrafts section specified in your config file disabled for %s", formatTarget(target))
+		cfg.Snapcrafts = nil
 	}
 
 	b, err := yaml.Marshal(cfg)
@@ -236,6 +246,34 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 		Path:    f.Name(),
 		Project: cfg,
 	}, nil
+}
+
+func allowNfpms(target Target) bool {
+	return target.Os == "linux"
+}
+
+func allowBrews(target Target) bool {
+	if target.Os != "linux" && target.Os != "darwin" {
+		return false
+	}
+	for _, a := range []string{"arm64", "arm", "amd64"} {
+		if target.Arch == a {
+			return true
+		}
+	}
+	return false
+}
+
+func allowSnaps(target Target) bool {
+	if target.Os != "linux" {
+		return false
+	}
+	for _, a := range []string{"s390x", "ppc64le", "arm64", "arm", "amd64", "386"} {
+		if target.Arch == a {
+			return true
+		}
+	}
+	return false
 }
 
 func hasCgoEnabled(envs []string) bool {

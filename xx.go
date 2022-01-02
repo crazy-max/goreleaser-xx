@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path"
 	"strings"
 )
 
@@ -67,6 +68,13 @@ func getTarget() (tgt Target) {
 	}
 
 	return
+}
+
+func formatTarget(target Target) string {
+	if target.Os == "" {
+		return "unknown"
+	}
+	return path.Join(target.Os, target.Arch, target.Arm+target.Mips)
 }
 
 func getCompilers(t Target) (cp Compilers) {
