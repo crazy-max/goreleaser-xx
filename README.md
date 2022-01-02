@@ -142,14 +142,11 @@ RUN --mount=type=bind,source=.,rw \
     --dist="/out" \
     --ldflags="-s -w -X 'main.version={{.Version}}'" \
     --files="LICENSE" \
-    --files="README.md" \
-    --replacements="386=i386" \
-    --replacements="amd64=x86_64" \
-    --envs="FOO=bar" \
-    --envs="BAR=foo"
+    --files="README.md"
 
 FROM scratch AS artifact
-COPY --from=build /out /
+COPY --from=build /out/*.tar.gz /
+COPY --from=build /out/*.zip /
 ```
 
 * `FROM --platform=$BUILDPLATFORM ...` command will pull an image that will
@@ -248,7 +245,8 @@ RUN --mount=type=bind,source=.,rw \
     --files="README.md"
 
 FROM scratch AS artifact
-COPY --from=build /out /
+COPY --from=build /out/*.tar.gz /
+COPY --from=build /out/*.zip /
 
 FROM alpine AS image
 RUN apk --update --no-cache add ca-certificates openssl
@@ -334,7 +332,8 @@ RUN --mount=type=bind,source=.,rw \
     --files="README.md"
 
 FROM scratch AS artifact
-COPY --from=build /out /
+COPY --from=build /out/*.tar.gz /
+COPY --from=build /out/*.zip /
 ```
 
 ### CGO
@@ -376,11 +375,8 @@ RUN --mount=type=bind,source=.,rw \
     --files="README.md"
 
 FROM scratch AS artifact
-COPY --from=build /out /
-
-FROM scratch
-COPY --from=build /usr/local/bin/myapp /myapp
-ENTRYPOINT [ "/myapp" ]
+COPY --from=build /out/*.tar.gz /
+COPY --from=build /out/*.zip /
 ```
 
 #### `tonistiigi/xx`
@@ -396,13 +392,7 @@ FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS base
 ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
 COPY --from=xx / /
-RUN apk add --no-cache \
-    clang \
-    git \
-    file \
-    lld \
-    llvm \
-    pkgconfig
+RUN apk add --no-cache clang git file lld llvm pkgconfig
 WORKDIR /src
 
 FROM base AS vendored
@@ -427,11 +417,8 @@ RUN --mount=type=bind,source=.,rw \
     --files="README.md"
 
 FROM scratch AS artifact
-COPY --from=build /out /
-
-FROM scratch
-COPY --from=build /usr/local/bin/myapp /myapp
-ENTRYPOINT [ "/myapp" ]
+COPY --from=build /out/*.tar.gz /
+COPY --from=build /out/*.zip /
 ```
 
 ## Notes
