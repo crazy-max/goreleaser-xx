@@ -348,9 +348,11 @@ Here are some examples to use CGO to build your project with `goreleaser-xx`:
 # syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
+FROM --platform=$BUILDPLATFORM crazymax/osxcross:11.3 AS osxcross
 FROM --platform=$BUILDPLATFORM crazymax/goxx:1.17 AS base
-ENV CGO_ENABLED=1
+COPY --from=osxcross /osxcross /osxcross
 COPY --from=goreleaser-xx / /
+ENV CGO_ENABLED=1
 RUN goxx-apt-get install --no-install-recommends -y git
 WORKDIR /src
 
@@ -406,6 +408,7 @@ RUN xx-apk add --no-cache gcc musl-dev
 # XX_CC_PREFER_STATIC_LINKER prefers ld to lld in ppc64le and 386.
 ENV XX_CC_PREFER_STATIC_LINKER=1
 RUN --mount=type=bind,source=.,rw \
+  --mount=from=crazymax/osxcross:11.3,src=/osxsdk,target=/xx-sdk \
   --mount=type=cache,target=/root/.cache \
   --mount=type=cache,target=/go/pkg/mod \
   goreleaser-xx --debug \
