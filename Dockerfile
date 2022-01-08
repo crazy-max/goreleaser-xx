@@ -1,9 +1,10 @@
-# syntax=docker/dockerfile:1.3
+# syntax=docker/dockerfile:1
 
-ARG GORELEASER_VERSION
-ARG GO_VERSION
+ARG GORELEASER_VERSION="1.2.5"
+ARG XX_VERSION="1.1.0"
+ARG GO_VERSION="1.17"
 
-FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.0 AS xx
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
 ENV CGO_ENABLED=0
 COPY --from=xx / /
