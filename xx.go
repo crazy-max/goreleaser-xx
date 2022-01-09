@@ -8,10 +8,11 @@ import (
 
 // Target holds Go compiler's target platform
 type Target struct {
-	Os   string
-	Arch string
-	Arm  string
-	Mips string
+	Os     string
+	Arch   string
+	Arm    string
+	Mips   string
+	Mips64 string
 }
 
 // Compilers holds C and C++ compilers
@@ -55,12 +56,10 @@ func getTarget() (tgt Target) {
 		}
 	}
 
-	if strings.HasPrefix(tgt.Arch, "mips") {
-		if len(variant) > 0 {
-			tgt.Mips = variant
-		} else {
-			tgt.Mips = "hardfloat"
-		}
+	if strings.HasPrefix(tgt.Arch, "mips64") && len(variant) > 0 {
+		tgt.Mips64 = variant
+	} else if strings.HasPrefix(tgt.Arch, "mips") && len(variant) > 0 {
+		tgt.Mips = variant
 	}
 
 	if tgt.Os == "wasi" {
