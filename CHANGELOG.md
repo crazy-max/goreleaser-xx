@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.5-r1 (2022/01/09)
+
+* Improve CGO handling (#95)
+* Handle `GOMIPS64` (#94)
+* Fix `GIT_REF`
+
 ## 1.2.5-r0 (2022/01/02)
 
 * GoReleaser 1.2.5 (#90)
