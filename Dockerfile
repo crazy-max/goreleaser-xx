@@ -39,7 +39,7 @@ RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
   --mount=target=/go/pkg/mod,type=cache \
   case "$GIT_REF" in \
-    refs/tags/v*) gitTag="${GIT_REF#refs/tags/v}" ;; \
+    refs/tags/v*) gitTag="${GIT_REF#refs/tags/}" ;; \
     *) gitTag=$(git describe --match 'v[0-9]*' --dirty='.m' --always --tags) ;; \
   esac \
   && xx-go build -v -ldflags "-w -s -X 'main.version=${gitTag}'" -o /usr/local/bin/goreleaser-xx \
