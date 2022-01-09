@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/kong"
+	"github.com/goreleaser/goreleaser/pkg/config"
 )
 
 var (
@@ -89,8 +90,6 @@ func main() {
 	if cli.Debug {
 		log.Println("DBG: environment:")
 		printEnv()
-		log.Println("DBG: go env:")
-		printGoEnv()
 	}
 
 	// Warn on deprecated flag usage and assign to new flag
@@ -131,18 +130,11 @@ func main() {
 		log.Printf("  GOARCH=%s", target.Arch)
 		log.Printf("  GOARM=%s", target.Arm)
 		log.Printf("  GOMIPS=%s", target.Mips)
+		log.Printf("  GOMIPS64=%s", target.Mips64)
 	}
 
 	// Get compilers
 	compilers := getCompilers(target)
-	if cli.Debug {
-		log.Println("DBG: compilers:")
-		log.Printf("  AR=%s", compilers.Ar)
-		log.Printf("  CC=%s", compilers.Cc)
-		log.Printf("  CXX=%s", compilers.Cxx)
-		log.Printf("  CGO_CFLAGS=%s", compilers.CgoCflags)
-		log.Printf("  CGO_CXXFLAGS=%s", compilers.CgoCxxflags)
-	}
 
 	// GoReleaser config
 	config, err := getConfig(cli, target, compilers)
@@ -153,6 +145,11 @@ func main() {
 		_ = os.Remove(config.Path)
 		_ = os.RemoveAll(config.Project.Dist)
 	}()
+
+	if cli.Debug {
+		log.Println("DBG: go env:")
+		printGoEnv(config.Project, target)
+	}
 
 	// Set GoReleaser flags
 	goreleaserFlags := []string{"release", "--config", config.Path}
@@ -316,12 +313,19 @@ func printEnv() {
 	}
 }
 
-func printGoEnv() {
+func printGoEnv(config config.Project, target Target) {
 	bin := "go"
 	if cli.GoBinary != "" {
 		bin = cli.GoBinary
 	}
 	cmd := exec.Command(bin, "env")
+	cmd.Env = append(os.Environ(), append([]string{
+		fmt.Sprintf("GOOS=%s", target.Os),
+		fmt.Sprintf("GOARCH=%s", target.Arch),
+		fmt.Sprintf("GOARM=%s", target.Arm),
+		fmt.Sprintf("GOMIPS=%s", target.Mips),
+		fmt.Sprintf("GOMIPS64=%s", target.Mips64),
+	}, config.Env...)...)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatalf("ERR: %v", err)
