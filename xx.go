@@ -17,53 +17,60 @@ type Target struct {
 
 // Compilers holds C and C++ compilers
 type Compilers struct {
-	Ar          string
-	Cc          string
-	Cxx         string
+	Triple string
+
+	Ar        string
+	Cc        string
+	Cxx       string
+	PkgConfig string
+
 	CgoCflags   string
+	CgoCppflags string
 	CgoCxxflags string
+	CgoFflags   string
+	CgoLdflags  string
 }
 
-func getTarget() (tgt Target) {
+func getTarget() (target Target) {
 	var variant string
 
 	if targetPlatform := os.Getenv("TARGETPLATFORM"); targetPlatform != "" {
 		stp := strings.Split(targetPlatform, "/")
-		tgt.Os, tgt.Arch = stp[0], stp[1]
+		target.Os, target.Arch = stp[0], stp[1]
 		if len(stp) == 3 {
 			variant = stp[2]
 		}
 	}
 
 	if targetOs := os.Getenv("TARGETOS"); targetOs != "" {
-		tgt.Os = targetOs
+		target.Os = targetOs
 	}
 	if targetArch := os.Getenv("TARGETARCH"); targetArch != "" {
-		tgt.Arch = targetArch
+		target.Arch = targetArch
 	}
 	if targetVariant := os.Getenv("TARGETVARIANT"); targetVariant != "" {
 		variant = targetVariant
 	}
 
-	if tgt.Arch == "arm" && len(variant) > 0 {
+	if target.Arch == "arm" && len(variant) > 0 {
 		switch variant {
 		case "v5":
-			tgt.Arm = "5"
+			target.Arm = "5"
 		case "v6":
-			tgt.Arm = "6"
+			target.Arm = "6"
 		default:
-			tgt.Arm = "7"
+			target.Arm = "7"
 		}
 	}
 
-	if strings.HasPrefix(tgt.Arch, "mips64") && len(variant) > 0 {
-		tgt.Mips64 = variant
-	} else if strings.HasPrefix(tgt.Arch, "mips") && len(variant) > 0 {
-		tgt.Mips = variant
+	if strings.HasPrefix(target.Arch, "mips64") && len(variant) > 0 {
+		target.Mips64 = variant
+	} else if strings.HasPrefix(target.Arch, "mips") && len(variant) > 0 {
+		target.Mips = variant
 	}
 
-	if tgt.Os == "wasi" {
-		tgt.Os = "js"
+	if target.Os == "wasi" {
+		target.Os = "js"
 	}
 
 	return
@@ -76,96 +83,81 @@ func formatTarget(target Target) string {
 	return path.Join(target.Os, target.Arch, target.Arm+target.Mips)
 }
 
-func getCompilers(t Target) (cp Compilers) {
-	switch t.Arch {
+func getCompilers(target Target) (cp Compilers) {
+	switch target.Arch {
 	case "386":
-		cp.Ar = "i686-linux-gnu-ar"
-		cp.Cc = "i686-linux-gnu-gcc"
-		cp.Cxx = "i686-linux-gnu-g++"
-		if t.Os == "windows" {
-			cp.Ar = "i686-w64-mingw32-ar"
-			cp.Cc = "i686-w64-mingw32-gcc"
-			cp.Cxx = "i686-w64-mingw32-g++"
-			cp.CgoCflags = "-D_WIN32_WINNT=0x0400"
-			cp.CgoCxxflags = "-D_WIN32_WINNT=0x0400"
+		cp.Triple = "i686-linux-gnu"
+		if target.Os == "windows" {
+			cp.Triple = "i686-w64-mingw32"
 		}
 	case "amd64":
-		if t.Os == "darwin" {
-			cp.Cc = "o64-clang"
-			cp.Cxx = "o64-clang++"
-		} else if t.Os == "windows" {
-			cp.Ar = "x86_64-w64-mingw32-ar"
-			cp.Cc = "x86_64-w64-mingw32-gcc"
-			cp.Cxx = "x86_64-w64-mingw32-g++"
-			cp.CgoCflags = "-D_WIN32_WINNT=0x0400"
-			cp.CgoCxxflags = "-D_WIN32_WINNT=0x0400"
-		} else {
-			cp.Ar = "x86_64-linux-gnu-ar"
-			cp.Cc = "x86_64-linux-gnu-gcc"
-			cp.Cxx = "x86_64-linux-gnu-g++"
+		if target.Os != "darwin" {
+			cp.Triple = "x86_64-linux-gnu"
+			if target.Os == "windows" {
+				cp.Triple = "x86_64-w64-mingw32"
+			}
 		}
 	case "arm":
-		switch t.Arm {
+		switch target.Arm {
 		case "5":
-			cp.Ar = "arm-linux-gnueabi-ar"
-			cp.Cc = "arm-linux-gnueabi-gcc"
-			cp.Cxx = "arm-linux-gnueabi-g++"
+			cp.Triple = "arm-linux-gnueabi"
+			if target.Os == "windows" {
+				cp.Triple = "armv5-w64-mingw32"
+			}
 			cp.CgoCflags = "-march=armv5t"
 			cp.CgoCxxflags = "-march=armv5t"
 		case "6":
-			cp.Ar = "arm-linux-gnueabi-ar"
-			cp.Cc = "arm-linux-gnueabi-gcc"
-			cp.Cxx = "arm-linux-gnueabi-g++"
+			cp.Triple = "arm-linux-gnueabi"
+			if target.Os == "windows" {
+				cp.Triple = "armv6-w64-mingw32"
+			}
 			cp.CgoCflags = "-march=armv6"
 			cp.CgoCxxflags = "-march=armv6"
 		case "7":
-			cp.Ar = "arm-linux-gnueabihf-ar"
-			cp.Cc = "arm-linux-gnueabihf-gcc"
-			cp.Cxx = "arm-linux-gnueabihf-g++"
+			cp.Triple = "arm-linux-gnueabihf"
+			if target.Os == "windows" {
+				cp.Triple = "armv7-w64-mingw32"
+			}
 			cp.CgoCflags = "-march=armv7-a"
 			cp.CgoCxxflags = "-march=armv7-a"
 		default:
-			cp.Ar = "arm-linux-gnueabihf-ar"
-			cp.Cc = "arm-linux-gnueabihf-gcc"
-			cp.Cxx = "arm-linux-gnueabihf-g++"
+			cp.Triple = "arm-linux-gnueabihf"
 		}
 	case "arm64":
-		if t.Os == "darwin" {
-			cp.Cc = "o64-clang"
-			cp.Cxx = "o64-clang++"
-		} else {
-			cp.Ar = "aarch64-linux-gnu-ar"
-			cp.Cc = "aarch64-linux-gnu-gcc"
-			cp.Cxx = "aarch64-linux-gnu-g++"
+		if target.Os != "darwin" {
+			cp.Triple = "aarch64-linux-gnu"
+			if target.Os == "windows" {
+				cp.Triple = "aarch64-w64-mingw32"
+			}
 		}
 	case "mips":
-		cp.Ar = "mips-linux-gnu-ar"
-		cp.Cc = "mips-linux-gnu-gcc"
-		cp.Cxx = "mips-linux-gnu-g++"
+		cp.Triple = "mips-linux-gnu"
 	case "mipsle":
-		cp.Ar = "mipsel-linux-gnu-ar"
-		cp.Cc = "mipsel-linux-gnu-gcc"
-		cp.Cxx = "mipsel-linux-gnu-g++"
+		cp.Triple = "mipsel-linux-gnu"
 	case "mips64":
-		cp.Ar = "mips64-linux-gnuabi64-ar"
-		cp.Cc = "mips64-linux-gnuabi64-gcc"
-		cp.Cxx = "mips64-linux-gnuabi64-g++"
+		cp.Triple = "mips64-linux-gnuabi64"
 	case "mips64le":
-		cp.Ar = "mips64el-linux-gnuabi64-ar"
-		cp.Cc = "mips64el-linux-gnuabi64-gcc"
-		cp.Cxx = "mips64el-linux-gnuabi64-g++"
+		cp.Triple = "mips64el-linux-gnuabi64"
 	case "ppc64le":
-		cp.Ar = "powerpc64le-linux-gnu-ar"
-		cp.Cc = "powerpc64le-linux-gnu-gcc"
-		cp.Cxx = "powerpc64le-linux-gnu-g++"
+		cp.Triple = "powerpc64le-linux-gnu"
 	case "riscv64":
-		cp.Ar = "riscv64-linux-gnu-ar"
-		cp.Cc = "riscv64-linux-gnu-gcc"
-		cp.Cxx = "riscv64-linux-gnu-g++"
+		cp.Triple = "riscv64-linux-gnu"
 	case "s390x":
-		cp.Ar = "s390x-linux-gnu-ar"
-		cp.Cc = "s390x-linux-gnu-gcc"
-		cp.Cxx = "s390x-linux-gnu-g++"
+		cp.Triple = "s390x-linux-gnu"
+	}
+
+	if target.Os == "darwin" {
+		cp.Cc = "o64-clang"
+		cp.Cxx = "o64-clang++"
+	} else {
+		cp.Ar = cp.Triple + "-ar"
+		cp.Cc = cp.Triple + "-gcc"
+		cp.Cxx = cp.Triple + "-g++"
+		cp.PkgConfig = cp.Triple + "-pkg-config"
+	}
+	if target.Os == "windows" {
+		cp.CgoCflags = "-D_WIN32_WINNT=0x0400"
+		cp.CgoCxxflags = "-D_WIN32_WINNT=0x0400"
 	}
 
 	if v := os.Getenv("AR"); v != "" {
@@ -177,11 +169,23 @@ func getCompilers(t Target) (cp Compilers) {
 	if v := os.Getenv("CXX"); v != "" {
 		cp.Cxx = v
 	}
+	if v := os.Getenv("PKG_CONFIG"); v != "" {
+		cp.PkgConfig = v
+	}
 	if v := os.Getenv("CGO_CFLAGS"); v != "" {
 		cp.CgoCflags = v
 	}
+	if v := os.Getenv("CGO_CPPFLAGS"); v != "" {
+		cp.CgoCppflags = v
+	}
 	if v := os.Getenv("CGO_CXXFLAGS"); v != "" {
 		cp.CgoCxxflags = v
+	}
+	if v := os.Getenv("CGO_FFLAGS"); v != "" {
+		cp.CgoFflags = v
+	}
+	if v := os.Getenv("CGO_LDFLAGS"); v != "" {
+		cp.CgoLdflags = v
 	}
 
 	return

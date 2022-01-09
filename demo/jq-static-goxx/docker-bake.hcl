@@ -9,11 +9,33 @@ target "_commons" {
 }
 
 group "default" {
-  targets = ["artifact"]
+  targets = ["image-local"]
+}
+
+target "image" {
+  inherits = ["_commons"]
+  tags = ["jq-static-goxx:local"]
+}
+
+target "image-local" {
+  inherits = ["image"]
+  output = ["type=docker"]
+}
+
+target "image-all" {
+  inherits = ["image"]
+  platforms = [
+    "linux/amd64",
+    "linux/arm64",
+    "linux/ppc64le",
+    "linux/riscv64",
+    "linux/s390x"
+  ]
 }
 
 target "artifact" {
   inherits = ["_commons"]
+  target = "artifact"
   output = ["./dist"]
 }
 

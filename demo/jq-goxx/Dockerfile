@@ -18,7 +18,7 @@ FROM base AS build
 ARG TARGETPLATFORM
 RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
   --mount=type=cache,sharing=private,target=/var/lib/apt/lists \
-  goxx-apt-get install -y binutils gcc g++ pkg-config libjq-dev libonig-dev
+  goxx-apt-get install -y binutils gcc pkg-config libjq-dev libonig-dev
 RUN goxx-macports --static install jq
 RUN --mount=type=bind,source=.,rw \
   --mount=type=cache,target=/root/.cache \
@@ -31,9 +31,5 @@ RUN --mount=type=bind,source=.,rw \
     --tags="netgo" \
     --files="README.md"
 
-FROM scratch AS artifact
-COPY --from=build /out /
-
 FROM scratch
-COPY --from=build /usr/local/bin/jq-goxx /jq-goxx
-ENTRYPOINT [ "/jq-goxx" ]
+COPY --from=build /out /
