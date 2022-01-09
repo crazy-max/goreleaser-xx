@@ -69,18 +69,32 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 		if len(compilers.Cc) > 0 {
 			if _, err = exec.LookPath(compilers.Cc); err == nil {
 				cfg.Env = append(cfg.Env, "CC="+compilers.Cc)
-				if len(compilers.CgoCflags) > 0 {
-					cfg.Env = append(cfg.Env, "CGO_CFLAGS="+compilers.CgoCflags)
-				}
 			}
 		}
 		if len(compilers.Cxx) > 0 {
 			if _, err = exec.LookPath(compilers.Cxx); err == nil {
 				cfg.Env = append(cfg.Env, "CXX="+compilers.Cxx)
-				if len(compilers.CgoCxxflags) > 0 {
-					cfg.Env = append(cfg.Env, "CGO_CXXFLAGS="+compilers.CgoCxxflags)
-				}
 			}
+		}
+		if len(compilers.PkgConfig) > 0 {
+			if _, err = exec.LookPath(compilers.PkgConfig); err == nil {
+				cfg.Env = append(cfg.Env, "PKG_CONFIG="+compilers.PkgConfig)
+			}
+		}
+		if len(compilers.CgoCflags) > 0 {
+			cfg.Env = append(cfg.Env, "CGO_CFLAGS="+compilers.CgoCflags)
+		}
+		if len(compilers.CgoCppflags) > 0 {
+			cfg.Env = append(cfg.Env, "CGO_CPPFLAGS="+compilers.CgoCppflags)
+		}
+		if len(compilers.CgoCxxflags) > 0 {
+			cfg.Env = append(cfg.Env, "CGO_CXXFLAGS="+compilers.CgoCxxflags)
+		}
+		if len(compilers.CgoFflags) > 0 {
+			cfg.Env = append(cfg.Env, "CGO_FFLAGS="+compilers.CgoFflags)
+		}
+		if len(compilers.CgoLdflags) > 0 {
+			cfg.Env = append(cfg.Env, "CGO_LDFLAGS="+compilers.CgoLdflags)
 		}
 	}
 	if len(cli.Envs) > 0 {
@@ -106,7 +120,11 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 	build.Goos = []string{target.Os}
 	build.Goarch = []string{target.Arch}
 	build.Goarm = []string{target.Arm}
-	build.Gomips = []string{target.Mips}
+	if strings.HasPrefix(target.Arch, "mips64") {
+		build.Gomips = []string{target.Mips64}
+	} else if strings.HasPrefix(target.Arch, "mips") {
+		build.Gomips = []string{target.Mips}
+	}
 
 	if len(cli.Main) > 0 {
 		build.Main = cli.Main
