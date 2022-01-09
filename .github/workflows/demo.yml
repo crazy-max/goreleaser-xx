@@ -30,6 +30,7 @@ jobs:
           - echo-webapp
           - gorm-goxx
           - jq-goxx
+          - jq-static-goxx
           - with-config
     services:
       registry:
