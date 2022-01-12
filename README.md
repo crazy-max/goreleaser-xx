@@ -46,14 +46,14 @@ ___
 
 ## Projects using goreleaser-xx
 
-* [ddns-route53](https://github.com/crazy-max/ddns-route53)
-* [Discord bot](https://github.com/blueprintue/discord-bot)
-* [Diun](https://github.com/crazy-max/diun)
-* [FTPGrab](https://github.com/crazy-max/ftpgrab)
-* [swarm-cronjob](https://github.com/crazy-max/swarm-cronjob)
-* [tarrer](https://github.com/pratikbalar/tarrer)
-* [yasu](https://github.com/crazy-max/yasu)
-* [Zipper](https://github.com/pratikbalar/zipper)
+* [ddns-route53](https://github.com/crazy-max/ddns-route53): Dynamic DNS for Amazon Route 53
+* [Diun](https://github.com/crazy-max/diun): Docker Image Update Notifier
+* [Distribution](https://github.com/distribution/distribution): The toolkit to pack, ship, store, and deliver container content (formerly docker/registry)
+* [faq](https://github.com/jzelinskie/faq): Format Agnostic jQ
+* [FTPGrab](https://github.com/crazy-max/ftpgrab): Grab your files periodically from a remote FTP or SFTP server easily
+* [swarm-cronjob](https://github.com/crazy-max/swarm-cronjob): Create jobs on a time-based schedule on Docker Swarm
+* [tarrer](https://github.com/pratikbalar/tarrer): Dumb br, bz2, zip, gz, lz4, sz, xz, zstd extractor
+* [yasu](https://github.com/crazy-max/yasu): Yet Another Switch User
 
 ## Image
 
