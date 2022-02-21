@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0-r0 (2022/02/21)
+
+* GoReleaser 1.5.0 (#102)
+* Bump github.com/alecthomas/kong from 0.2.22 to 0.4.1 (#93 #101)
+
 ## 1.2.5-r1 (2022/01/09)
 
 * Improve CGO handling (#95)
