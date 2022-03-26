@@ -1,10 +1,10 @@
 module github.com/crazy-max/goreleaser-xx
 
-go 1.17
+go 1.18
 
 require (
 	github.com/alecthomas/kong v0.5.0
-	github.com/goreleaser/goreleaser v1.5.0
+	github.com/goreleaser/goreleaser v1.7.0
 	github.com/pkg/errors v0.9.1
 	golang.org/x/sys v0.0.0-20220204135822-1c1b9b1eba6a
 	gopkg.in/yaml.v2 v2.4.0
@@ -15,7 +15,7 @@ require (
 	github.com/apex/log v1.9.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/goreleaser/fileglob v1.3.0 // indirect
-	github.com/goreleaser/nfpm/v2 v2.13.0 // indirect
+	github.com/goreleaser/nfpm/v2 v2.15.0 // indirect
 	github.com/iancoleman/orderedmap v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
