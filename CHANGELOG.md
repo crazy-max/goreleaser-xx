@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0-r0 (2022/03/26)
+
+* GoReleaser 1.7.0 (#108)
+* Go 1.18
+* Bump github.com/alecthomas/kong from 0.4.1 to 0.5.0 (#105)
+
 ## 1.5.0-r0 (2022/02/21)
 
 * GoReleaser 1.5.0 (#102)
