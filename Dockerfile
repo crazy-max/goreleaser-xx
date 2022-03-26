@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 
-ARG GORELEASER_VERSION="1.5.0"
+ARG GORELEASER_VERSION="1.7.0"
 ARG XX_VERSION="1.1.0"
-ARG GO_VERSION="1.17"
+ARG GO_VERSION="1.18"
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS base
