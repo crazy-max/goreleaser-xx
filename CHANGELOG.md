@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.3-r0 (2022/04/21)
+
+* GoReleaser 1.8.3 (#111)
+* Handle `GOAMD64` variant
+
 ## 1.7.0-r0 (2022/03/26)
 
 * GoReleaser 1.7.0 (#108)
