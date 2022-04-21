@@ -26,6 +26,7 @@ target "image-all" {
   inherits = ["image"]
   platforms = [
     "linux/amd64",
+    "linux/amd64/v2",
     "linux/arm/v6",
     "linux/arm/v7",
     "linux/arm64",
@@ -48,6 +49,7 @@ target "artifact-all" {
     "darwin/arm64",
     "linux/386",
     "linux/amd64",
+    "linux/amd64/v2",
     "linux/arm/v6",
     "linux/arm/v7",
     "linux/arm64",

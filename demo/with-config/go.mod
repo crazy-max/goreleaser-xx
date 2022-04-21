@@ -1,6 +1,6 @@
 module github.com/crazy-max/goreleaser-xx/demo/hello
 
-go 1.17
+go 1.18
 
 require github.com/charmbracelet/glamour v0.3.0
 

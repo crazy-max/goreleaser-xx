@@ -117,6 +117,10 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 	if len(build.Gomips) > 0 {
 		log.Printf("WARN: gomips specified in your config file is overrided")
 	}
+	if len(build.Goamd64) > 0 {
+		log.Printf("WARN: goarm specified in your config file is overrided")
+	}
+
 	build.Goos = []string{target.Os}
 	build.Goarch = []string{target.Arch}
 	build.Goarm = []string{target.Arm}
@@ -125,6 +129,7 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 	} else if strings.HasPrefix(target.Arch, "mips") {
 		build.Gomips = []string{target.Mips}
 	}
+	build.Goamd64 = []string{target.Amd64}
 
 	if len(cli.Main) > 0 {
 		build.Main = cli.Main
