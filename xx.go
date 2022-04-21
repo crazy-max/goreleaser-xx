@@ -13,6 +13,7 @@ type Target struct {
 	Arm    string
 	Mips   string
 	Mips64 string
+	Amd64  string
 }
 
 // Compilers holds C and C++ compilers
@@ -67,6 +68,19 @@ func getTarget() (target Target) {
 		target.Mips64 = variant
 	} else if strings.HasPrefix(target.Arch, "mips") && len(variant) > 0 {
 		target.Mips = variant
+	}
+
+	if target.Arch == "amd64" && len(variant) > 0 {
+		switch variant {
+		case "v4":
+			target.Amd64 = "v4"
+		case "v3":
+			target.Amd64 = "v3"
+		case "v2":
+			target.Amd64 = "v2"
+		default:
+			target.Amd64 = "v1"
+		}
 	}
 
 	if target.Os == "wasi" {

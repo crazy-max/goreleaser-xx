@@ -131,6 +131,7 @@ func main() {
 		log.Printf("  GOARM=%s", target.Arm)
 		log.Printf("  GOMIPS=%s", target.Mips)
 		log.Printf("  GOMIPS64=%s", target.Mips64)
+		log.Printf("  GOAMD64=%s", target.Amd64)
 	}
 
 	// Get compilers
@@ -325,6 +326,7 @@ func printGoEnv(config config.Project, target Target) {
 		fmt.Sprintf("GOARM=%s", target.Arm),
 		fmt.Sprintf("GOMIPS=%s", target.Mips),
 		fmt.Sprintf("GOMIPS64=%s", target.Mips64),
+		fmt.Sprintf("GOAMD64=%s", target.Amd64),
 	}, config.Env...)...)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

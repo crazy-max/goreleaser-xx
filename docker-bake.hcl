@@ -5,7 +5,7 @@ variable "GITHUB_REF" {
 
 // GoReleaser version
 variable "GORELEASER_VERSION" {
-  default = "1.7.0"
+  default = "1.8.3"
 }
 
 // Go version to build GoReleaser and goreleaser-xx
@@ -43,11 +43,15 @@ target "image-local" {
 target "image-all" {
   inherits = ["image"]
   platforms = [
+    "linux/386",
     "linux/amd64",
+    "linux/arm/v5",
     "linux/arm/v6",
     "linux/arm/v7",
     "linux/arm64",
-    "linux/386"
+    "linux/ppc64le",
+    "linux/riscv64",
+    "linux/s390x"
   ]
 }
 
