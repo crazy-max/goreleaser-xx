@@ -45,12 +45,12 @@ jobs:
           fetch-depth: 0
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
         with:
           driver-opts: network=host
       -
         name: Build goreleaser-xx
-        uses: docker/bake-action@v1
+        uses: docker/bake-action@v2
         with:
           targets: image
           push: true
@@ -58,7 +58,7 @@ jobs:
             *.tags=localhost:5000/goreleaser-xx:local
       -
         name: Build demo
-        uses: docker/bake-action@v1
+        uses: docker/bake-action@v2
         with:
           files: ./demo/${{ matrix.demo }}/docker-bake.hcl
           targets: artifact-all
