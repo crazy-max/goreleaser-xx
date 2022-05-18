@@ -138,22 +138,22 @@ func main() {
 	compilers := getCompilers(target)
 
 	// GoReleaser config
-	config, err := getConfig(cli, target, compilers)
+	cfg, err := getConfig(cli, target, compilers)
 	if err != nil {
 		log.Fatalf("ERR: %v", err)
 	}
 	defer func() {
-		_ = os.Remove(config.Path)
-		_ = os.RemoveAll(config.Project.Dist)
+		_ = os.Remove(cfg.Path)
+		_ = os.RemoveAll(cfg.Project.Dist)
 	}()
 
 	if cli.Debug {
 		log.Println("DBG: go env:")
-		printGoEnv(config.Project, target)
+		printGoEnv(cfg.Project, target)
 	}
 
 	// Set GoReleaser flags
-	goreleaserFlags := []string{"release", "--config", config.Path}
+	goreleaserFlags := []string{"release", "--config", cfg.Path}
 
 	// Git tag
 	if strings.HasPrefix(cli.GitRef, "refs/tags/v") {
@@ -194,7 +194,7 @@ func main() {
 	}
 
 	// Post build
-	fdist, err := os.Open(config.Project.Dist)
+	fdist, err := os.Open(cfg.Project.Dist)
 	if err != nil {
 		log.Printf("WARN: cannot open dist folder: %v", err)
 	}
@@ -219,7 +219,7 @@ func main() {
 				var atfPath string
 				switch atf {
 				case "bin":
-					binName := config.Project.ProjectName
+					binName := cfg.Project.ProjectName
 					atfName := strings.TrimSuffix(fi.Name(), archiveExt)
 					if target.Os == "windows" {
 						atfName += ".exe"

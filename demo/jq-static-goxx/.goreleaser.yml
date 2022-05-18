@@ -12,8 +12,7 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 
 brews:
-  - goarm: "7"
-    tap:
+  - tap:
       owner: jzelinskie
       name: homebrew-faq
     folder: Formula

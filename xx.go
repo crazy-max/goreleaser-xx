@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -8,6 +9,8 @@ import (
 
 // Target holds Go compiler's target platform
 type Target struct {
+	Pair string
+
 	Os     string
 	Arch   string
 	Arm    string
@@ -52,6 +55,8 @@ func getTarget() (target Target) {
 	if targetVariant := os.Getenv("TARGETVARIANT"); targetVariant != "" {
 		variant = targetVariant
 	}
+
+	target.Pair = fmt.Sprintf("%s-%s%s", target.Os, target.Arch, variant)
 
 	if target.Arch == "arm" && len(variant) > 0 {
 		switch variant {

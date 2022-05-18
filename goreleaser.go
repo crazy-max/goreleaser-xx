@@ -123,13 +123,17 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 
 	build.Goos = []string{target.Os}
 	build.Goarch = []string{target.Arch}
-	build.Goarm = []string{target.Arm}
+	if len(target.Arch) > 0 {
+		build.Goarm = []string{target.Arm}
+	}
+	if len(target.Amd64) > 0 {
+		build.Goamd64 = []string{target.Amd64}
+	}
 	if strings.HasPrefix(target.Arch, "mips64") {
 		build.Gomips = []string{target.Mips64}
 	} else if strings.HasPrefix(target.Arch, "mips") {
 		build.Gomips = []string{target.Mips}
 	}
-	build.Goamd64 = []string{target.Amd64}
 
 	if len(cli.Main) > 0 {
 		build.Main = cli.Main
@@ -176,7 +180,7 @@ func getConfig(cli Cli, target Target, compilers Compilers) (grc GoReleaserConfi
 		})
 	}
 
-	var archive config.Archive
+	archive := config.Archive{ID: target.Pair}
 	if len(cfg.Archives) == 1 {
 		archive = cfg.Archives[0]
 	} else if len(cfg.Archives) > 1 {

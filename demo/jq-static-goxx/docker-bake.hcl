@@ -1,10 +1,10 @@
-variable "GOXX_BASE" {
-  default = "crazymax/goxx:latest"
+variable "GORELEASER_XX_BASE" {
+  default = "crazymax/goreleaser-xx:edge"
 }
 
 target "_commons" {
   args = {
-    GOXX_BASE = GOXX_BASE
+    GORELEASER_XX_BASE = GORELEASER_XX_BASE
   }
 }
 
