@@ -446,9 +446,6 @@ agnostic usage of this repo:
 git clone https://github.com/crazy-max/goreleaser-xx.git goreleaser-xx
 cd goreleaser-xx
 
-# test goreleaser-xx
-docker buildx bake test
-
 # build docker image and output to docker with goreleaser-xx:local tag (default)
 docker buildx bake
 
