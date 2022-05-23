@@ -27,8 +27,8 @@ github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5y
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/goreleaser/fileglob v1.3.0 h1:/X6J7U8lbDpQtBvGcwwPS6OpzkNVlVEsFUVRx9+k+7I=
 github.com/goreleaser/fileglob v1.3.0/go.mod h1:Jx6BoXv3mbYkEzwm9THo7xbr5egkAraxkGorbJb4RxU=
-github.com/goreleaser/goreleaser v1.8.3 h1:4vP28LV1VOL+mtEVvejCkN6KD1OU++7YNCh9dojxcO0=
-github.com/goreleaser/goreleaser v1.8.3/go.mod h1:DpiLDZkJQ1bbKW0ipWPJApOp8T4naqqk9nxyldGRy4k=
+github.com/goreleaser/goreleaser v1.9.1 h1:YtQg3W9MFYinzRPuWQ1uAV0ikLz49JKBgAnZWsXk7Q4=
+github.com/goreleaser/goreleaser v1.9.1/go.mod h1:LaST+VTzBrTMUxfWABpziqv3NDZ/xgbI4nO7ZzKxlYA=
 github.com/goreleaser/nfpm/v2 v2.15.1 h1:OdscWscGNR4aBepj2S5p6JUHWFd3CJdTJlSq7UqMMTY=
 github.com/goreleaser/nfpm/v2 v2.15.1/go.mod h1:fpR40o+Wq6aeE5xoSZY3E23r06aLntuYIr2zBCJ1x1o=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
