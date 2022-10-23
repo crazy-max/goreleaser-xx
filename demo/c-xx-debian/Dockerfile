@@ -2,7 +2,7 @@
 
 ARG GO_VERSION=1.17
 ARG GORELEASER_XX_BASE=crazymax/goreleaser-xx:edge
-ARG XX_VERSION=master
+ARG XX_VERSION=1.1.2
 
 FROM --platform=$BUILDPLATFORM ${GORELEASER_XX_BASE} AS goreleaser-xx
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx

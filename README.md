@@ -19,7 +19,6 @@ projects.
 ___
 
 * [Features](#features)
-* [Projects using goreleaser-xx](#projects-using-goreleaser-xx)
 * [Image](#image)
 * [CLI](#cli)
 * [Usage](#usage)
@@ -43,17 +42,6 @@ ___
 * Translation of [platform ARGs in the global scope](https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope) into Go compiler's target
 * Auto generation of `.goreleaser.yml` config based on target architecture
 * [Demo projects](demo)
-
-## Projects using goreleaser-xx
-
-* [ddns-route53](https://github.com/crazy-max/ddns-route53): Dynamic DNS for Amazon Route 53
-* [Diun](https://github.com/crazy-max/diun): Docker Image Update Notifier
-* [Distribution](https://github.com/distribution/distribution): The toolkit to pack, ship, store, and deliver container content (formerly docker/registry)
-* [faq](https://github.com/jzelinskie/faq): Format Agnostic jQ
-* [FTPGrab](https://github.com/crazy-max/ftpgrab): Grab your files periodically from a remote FTP or SFTP server easily
-* [swarm-cronjob](https://github.com/crazy-max/swarm-cronjob): Create jobs on a time-based schedule on Docker Swarm
-* [tarrer](https://github.com/pratikbalar/tarrer): Dumb br, bz2, zip, gz, lz4, sz, xz, zstd extractor
-* [yasu](https://github.com/crazy-max/yasu): Yet Another Switch User
 
 ## Image
 
@@ -393,7 +381,7 @@ COPY --from=build /out/*.zip /
 # syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM crazymax/goreleaser-xx:latest AS goreleaser-xx
-FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.0 AS xx
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.2 AS xx
 FROM --platform=$BUILDPLATFORM golang:1.17-alpine AS base
 ENV CGO_ENABLED=1
 COPY --from=goreleaser-xx / /
