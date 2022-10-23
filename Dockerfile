@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG GORELEASER_VERSION="1.8.3"
-ARG XX_VERSION="1.1.0"
+ARG XX_VERSION="1.1.2"
 ARG GO_VERSION="1.18"
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
