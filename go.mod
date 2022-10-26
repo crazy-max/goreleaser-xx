@@ -3,7 +3,7 @@ module github.com/crazy-max/goreleaser-xx
 go 1.18
 
 require (
-	github.com/alecthomas/kong v0.6.1
+	github.com/alecthomas/kong v0.7.0
 	github.com/goreleaser/goreleaser v1.8.3
 	github.com/pkg/errors v0.9.1
 	golang.org/x/sys v0.0.0-20220204135822-1c1b9b1eba6a
