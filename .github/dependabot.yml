@@ -20,3 +20,13 @@ updates:
     labels:
       - ":game_die: dependencies"
       - ":robot: bot"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday" # Thursday is arbitrary
+    labels:
+      - "Update dependencies"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-minor", "version-update:semver-patch"]
