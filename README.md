@@ -6,6 +6,11 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/crazymax/goreleaser-xx.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/crazymax/goreleaser-xx/)
 [![Go Report Card](https://goreportcard.com/badge/github.com/crazy-max/goreleaser-xx)](https://goreportcard.com/report/github.com/crazy-max/goreleaser-xx)
 
+## ⚠️ Abandoned project
+
+This project is not maintained anymore and is abandoned. Feel free to fork and
+make your own changes if needed.
+
 ## About
 
 `goreleaser-xx` is a small CLI wrapper for [GoReleaser](https://github.com/goreleaser/goreleaser)
